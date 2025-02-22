@@ -93,7 +93,7 @@ const AITools = () => {
                       <p className="mt-2 text-gray-400">{tool.description}</p>
                       <div className="mt-4 inline-flex items-center text-green-400 group-hover:text-green-300 transition-colors">
                         <span className="border-b border-transparent group-hover:border-green-300 transition-all">
-                          Open Tool
+                          Open Tool sdsg
                         </span>
                         <ExternalLink className="h-4 w-4 ml-2 -translate-y-px" />
                       </div>
