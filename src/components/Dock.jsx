@@ -16,14 +16,11 @@ import {
   useState,
 } from "react";
 
-/**
- * Individual Dock Item (icon + label)
- */
 function DockItem({
   children,
   className = "",
   onClick,
-  mouseY,
+  mouseX,
   spring,
   distance,
   magnification,
@@ -32,16 +29,14 @@ function DockItem({
   const ref = useRef(null);
   const isHovered = useMotionValue(0);
 
-  // Calculate distance from mouse to the center of this item
-  const mouseDistance = useTransform(mouseY, (val) => {
+  const mouseDistance = useTransform(mouseX, (val) => {
     const rect = ref.current?.getBoundingClientRect() ?? {
-      y: 0,
-      height: baseItemSize,
+      x: 0,
+      width: baseItemSize,
     };
-    return val - rect.y - baseItemSize / 2;
+    return val - rect.x - baseItemSize / 2;
   });
 
-  // Scale the icon based on how close the mouse is
   const targetSize = useTransform(
     mouseDistance,
     [-distance, 0, distance],
@@ -61,9 +56,7 @@ function DockItem({
       onFocus={() => isHovered.set(1)}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
-      className={`relative inline-flex items-center justify-center 
-        rounded-[10px] bg-[#060606] border-2 border-neutral-700 shadow-md 
-        ${className}`}
+      className={`relative inline-flex items-center justify-center rounded-[10px] bg-[#060606] border-neutral-700 border-2 shadow-md ${className}`}
       tabIndex={0}
       role="button"
       aria-haspopup="true"
@@ -73,9 +66,6 @@ function DockItem({
   );
 }
 
-/**
- * Dock Label - shown on hover
- */
 function DockLabel({ children, className = "", ...rest }) {
   const { isHovered } = rest;
   const [isVisible, setIsVisible] = useState(false);
@@ -91,15 +81,13 @@ function DockLabel({ children, className = "", ...rest }) {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          exit={{ opacity: 0, scaleX: 0 }}
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: -10 }}
+          exit={{ opacity: 0, y: 0 }}
           transition={{ duration: 0.2 }}
-          // Expand from the left edge
-          style={{ originX: 0 }}
-          className={`${className} absolute left-full top-1/2 
-            -translate-y-1/2 ml-2 whitespace-pre rounded-md border border-neutral-700 
-            bg-[#060606] px-2 py-0.5 text-xs text-white`}
+          className={`${className} absolute -top-6 left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060606] px-2 py-0.5 text-xs text-white`}
+          role="tooltip"
+          style={{ x: "-50%" }}
         >
           {children}
         </motion.div>
@@ -108,9 +96,6 @@ function DockLabel({ children, className = "", ...rest }) {
   );
 }
 
-/**
- * Dock Icon - just a wrapper for the icon element
- */
 function DockIcon({ children, className = "" }) {
   return (
     <div className={`flex items-center justify-center ${className}`}>
@@ -119,51 +104,42 @@ function DockIcon({ children, className = "" }) {
   );
 }
 
-/**
- * Main Dock Component
- */
 export default function Dock({
   items,
   className = "",
   spring = { mass: 0.1, stiffness: 150, damping: 12 },
   magnification = 70,
   distance = 200,
-  panelWidth = 64, // 'width' of the collapsed dock
+  panelHeight = 75,
   dockHeight = 256,
   baseItemSize = 50,
 }) {
-  // Track mouse Y position for vertical expansion
-  const mouseY = useMotionValue(Infinity);
+  const mouseX = useMotionValue(Infinity);
   const isHovered = useMotionValue(0);
 
-  // Expand the dock panel from panelWidth to maxWidth on hover
-  const maxWidth = useMemo(
+  const maxHeight = useMemo(
     () => Math.max(dockHeight, magnification + magnification / 2 + 4),
     [magnification, dockHeight]
   );
-  const widthRow = useTransform(isHovered, [0, 1], [panelWidth, maxWidth]);
-  const width = useSpring(widthRow, spring);
+  const heightRow = useTransform(isHovered, [0, 1], [panelHeight, maxHeight]);
+  const height = useSpring(heightRow, spring);
 
   return (
     <motion.div
-      style={{ width, scrollbarWidth: "none" }}
+      style={{ height, scrollbarWidth: "none" }}
       className="mx-2 flex max-w-full items-center"
     >
       <motion.div
-        onMouseMove={({ pageY }) => {
+        onMouseMove={({ pageX }) => {
           isHovered.set(1);
-          mouseY.set(pageY);
+          mouseX.set(pageX);
         }}
         onMouseLeave={() => {
           isHovered.set(0);
-          mouseY.set(Infinity);
+          mouseX.set(Infinity);
         }}
-        // Position the dock on the left side, vertically centered
-        className={`${className} absolute lef-2 top-1/2 
-          -translate-y-1/2 flex flex-col items-center gap-4 
-          rounded-2xl border-2 border-neutral-700 pb-2 
-          bg-transparent`} 
-        style={{ width: panelWidth }}
+        className={`${className} absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-end w-fit gap-4 rounded-2xl border-neutral-700 border-2 pb-2 px-4`}
+        style={{ height: panelHeight }}
         role="toolbar"
         aria-label="Application dock"
       >
@@ -172,7 +148,7 @@ export default function Dock({
             key={index}
             onClick={item.onClick}
             className={item.className}
-            mouseY={mouseY}
+            mouseX={mouseX}
             spring={spring}
             distance={distance}
             magnification={magnification}

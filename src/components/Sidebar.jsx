@@ -55,9 +55,8 @@ const Sidebar = () => {
       path: "/chat",
     },
   ];
-
   return (
-    <div className="fixed left-0 top-0 h-full z-20">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-20">
       <Dock
         items={items.map((item) => ({
           ...item,
@@ -71,6 +70,6 @@ const Sidebar = () => {
       />
     </div>
   );
-};
+};  
 
 export default Sidebar;
