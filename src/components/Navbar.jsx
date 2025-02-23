@@ -13,7 +13,7 @@ const Navbar = () => {
       transition={{ duration: 0.3 }}
       className="bg-gray-900/80 border-b border-gray-800/30 backdrop-blur-lg"
     >
-      <div className="px-6 py-3">
+      <div className="px-6 py-3 z-10">
         <div className="flex items-center justify-between">
           {/* Search Bar */}
           <motion.div 

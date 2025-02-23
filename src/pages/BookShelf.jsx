@@ -115,11 +115,11 @@ const BookShelf = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto min-h-screen p-6 bg-black">
+    <div className="max-w-6xl mx-auto min-h-screen p-6 ">
       {/* Add Material Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 rounded-xl p-6 w-full max-w-md ring-1 ring-gray-800">
+        <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
+          <div className=" rounded-xl p-6 w-full max-w-md ring-1 ring-gray-800">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-white">Add New Material</h2>
               <button
@@ -284,7 +284,7 @@ const BookShelf = () => {
       )}
 
       {/* Main Content */}
-      <div className="bg-gray-900 rounded-xl p-8 ring-1 ring-gray-800">
+      <div className="rounded-xl p-8 ring-1 ring-gray-800">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white">Book Shelf</h1>
           <button

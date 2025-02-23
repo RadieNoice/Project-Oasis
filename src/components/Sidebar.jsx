@@ -62,10 +62,10 @@ const Sidebar = () => {
           ...item,
           onClick: () => navigate(item.path),
         }))}
-        panelWidth={72}
-        baseItemSize={56}
-        magnification={72}
-        spring={{ mass: 0.2, stiffness: 170, damping: 15 }}
+        panelHeight={68}
+        baseItemSize={50}
+        magnification={70}
+        spring={{ mass: 0.2, stiffness: 150, damping: 12 }}
         className="py-4"
       />
     </div>

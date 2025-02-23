@@ -225,6 +225,7 @@ const Particles = ({
     <div
       ref={containerRef}
       className={`relative w-full h-full ${className}`}
+      style={{ position: 'absolute', inset: 0 }}
     />
   );
 };
