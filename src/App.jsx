@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 
 // Lazy load pages
-const Dashboard = React.lazy(() => import("./pages/Dashboard.jsx"));
+const Dashboard = React.lazy(() => import("./pages//Dashboard/Dashboard.jsx"));
 const Calendar = React.lazy(() => import("./pages/Calendar.jsx"));
 const BookShelf = React.lazy(() => import("./pages/BookShelf.jsx"));
 const AITools = React.lazy(() => import("./pages/AITools.jsx"));
