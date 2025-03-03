@@ -6,6 +6,7 @@ import TasksCompleted from "./TasksCompleted.jsx";
 import CurrentStreak from "./CurrentStreak.jsx";
 import { toast } from "react-hot-toast";
 import TaskManager from "./TaskManager.jsx";
+import PomodoroBox from "../../components/PomodoroBox.jsx";
 
 const Dashboard = () => {
   // Load saved data from localStorage
@@ -189,6 +190,7 @@ const Dashboard = () => {
         <StudyTimeToday todos={todos} workTime={workTime} totalStudyTime={totalStudyTime} />
         <TasksCompleted todos={todos} />
         <CurrentStreak />
+        <PomodoroBox compact={true} />
       </div>
 
       {/* Task Manager is now a separate component */}
