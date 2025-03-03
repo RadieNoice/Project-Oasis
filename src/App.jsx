@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,6 +8,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import Layout from "./components/Layout";
 import { quantum } from "ldrs";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 quantum.register();
 
@@ -36,21 +37,23 @@ const pageVariants = {
 // Remove Layout from wrapping the entire app
 function App() {
   return (
-    <Router>
-      <React.Suspense
-        fallback={
-          <div className="flex h-screen w-screen items-center justify-center bg-gray-900">
-            <l-quantum size="45" speed="1.75" color="black"></l-quantum>
-            <div className="mt-8 text-blue-400 font-light text-2xl animate-pulse">
-              Loading Oasis...
+    <ThemeProvider>
+      <Router>
+        <React.Suspense
+          fallback={
+            <div className="flex h-screen w-screen items-center justify-center bg-gray-900">
+              <l-quantum size="45" speed="1.75" color="black"></l-quantum>
+              <div className="mt-8 text-blue-400 font-light text-2xl animate-pulse">
+                Loading Oasis...
+              </div>
+              <div className="absolute w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
             </div>
-            <div className="absolute w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
-          </div>
-        }
-      >
-        <AppRoutes />
-      </React.Suspense>
-    </Router>
+          }
+        >
+          <AppRoutes />
+        </React.Suspense>
+      </Router>
+    </ThemeProvider>
   );
 }
 

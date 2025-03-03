@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Renderer, Camera, Geometry, Program, Mesh } from "ogl";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const defaultColors = ["#ffffff", "#ffffff", "#ffffff"];
 
@@ -90,6 +91,9 @@ const Particles = ({
 }) => {
   const containerRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const { isLightTheme } = useTheme();
+
+  const lightThemeColors = ["#cccccc", "#dddddd", "#eeeeee"];
 
   useEffect(() => {
     const container = containerRef.current;
@@ -98,6 +102,7 @@ const Particles = ({
     const renderer = new Renderer({ depth: false, alpha: true });
     const gl = renderer.gl;
     container.appendChild(gl.canvas);
+
     gl.clearColor(0, 0, 0, 0);
 
     const camera = new Camera(gl, { fov: 15 });
@@ -127,7 +132,7 @@ const Particles = ({
     const positions = new Float32Array(count * 3);
     const randoms = new Float32Array(count * 4);
     const colors = new Float32Array(count * 3);
-    const palette = particleColors && particleColors.length > 0 ? particleColors : defaultColors;
+    const palette = isLightTheme ? lightThemeColors : (particleColors && particleColors.length > 0 ? particleColors : defaultColors);
 
     for (let i = 0; i < count; i++) {
       let x, y, z, len;
@@ -207,7 +212,6 @@ const Particles = ({
         container.removeChild(gl.canvas);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     particleCount,
     particleSpread,
@@ -219,6 +223,7 @@ const Particles = ({
     sizeRandomness,
     cameraDistance,
     disableRotation,
+    isLightTheme,
   ]);
 
   return (

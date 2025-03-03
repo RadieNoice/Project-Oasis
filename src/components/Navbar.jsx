@@ -17,16 +17,17 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Navbar = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
   const navigate = useNavigate();
+  const { isLightTheme, toggleTheme } = useTheme();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New achievement unlocked", read: false, time: "10m ago" },
     { id: 2, title: "Task completed", read: true, time: "1h ago" },
@@ -160,9 +161,9 @@ const Navbar = () => {
   };
 
   // Handle theme toggle
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    // Here you would normally update a theme context or localStorage
+  const handleThemeToggle = () => {
+    console.log('Theme toggle button clicked');
+    toggleTheme();
   };
 
   // Handle profile navigation
@@ -190,7 +191,7 @@ const Navbar = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="relative bg-gray-900/80 border-b border-gray-800/30 backdrop-blur-lg z-50"
+      className={`relative ${isLightTheme ? 'bg-gray-100/80 border-b border-gray-300/30' : 'bg-gray-900/80 border-b border-gray-800/30'} backdrop-blur-lg z-50`}
     >
       <div className="px-6 py-3">
         <div className="flex items-center justify-between">
@@ -218,10 +219,10 @@ const Navbar = () => {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-xl hover:bg-gray-800/50 transition-colors duration-200"
+                className={`p-2 rounded-xl ${isLightTheme ? 'bg-gray-200/50 hover:bg-gray-300 text-gray-700' : 'bg-gray-800/50 hover:bg-gray-800 text-gray-300'} transition-colors`}
                 onClick={handleAddTab}
               >
-                <Plus className="h-5 w-5 text-gray-300" />
+                <Plus className="h-5 w-5" />
               </motion.button>
 
               {/* Dropdown Menu for Pages */}
@@ -232,12 +233,12 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute left-0 top-full mt-2 bg-gray-900/95 border border-gray-700/50 rounded-lg shadow-lg z-50 backdrop-blur-sm overflow-hidden"
+                    className={`absolute left-0 top-full mt-2 ${isLightTheme ? 'bg-gray-100/95 border border-gray-300/50' : 'bg-gray-900/95 border border-gray-700/50'} rounded-lg shadow-lg z-50 backdrop-blur-sm overflow-hidden`}
                   >
                     {Object.entries(pathLabels).map(([path, { label }]) => (
                       <div
                         key={path}
-                        className="px-4 py-2.5 text-gray-300 hover:bg-gray-800/70 cursor-pointer transition-colors flex items-center gap-2"
+                        className={`px-4 py-2.5 ${isLightTheme ? 'text-gray-700 hover:bg-gray-200/70' : 'text-gray-300 hover:bg-gray-800/70'} cursor-pointer transition-colors flex items-center gap-2`}
                         onClick={() => handleSelectPage(path)}
                       >
                         <div className="w-2 h-2 rounded-full bg-blue-500/70"></div>
@@ -260,8 +261,12 @@ const Navbar = () => {
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md 
                         ${
                           tab.path === location.pathname
-                            ? "bg-gray-800 text-blue-400 border border-blue-500/30"
-                            : "bg-gray-800/50 text-gray-400 border border-transparent hover:border-gray-700/50"
+                            ? isLightTheme 
+                              ? "bg-gray-200 text-blue-600 border border-blue-500/30"
+                              : "bg-gray-800 text-blue-400 border border-blue-500/30"
+                            : isLightTheme
+                              ? "bg-gray-200/50 text-gray-600 border border-transparent hover:border-gray-300/50"
+                              : "bg-gray-800/50 text-gray-400 border border-transparent hover:border-gray-700/50"
                         } 
                         transition-all duration-200 cursor-pointer`}
                       onClick={() => navigate(tab.path)}
@@ -273,7 +278,7 @@ const Navbar = () => {
                         onClick={(e) => handleCloseTab(index, e)}
                         className="p-0.5 rounded-full hover:bg-gray-700/70"
                       >
-                        <X className="h-3 w-3 text-gray-500 hover:text-gray-300" />
+                        <X className={`h-3 w-3 ${isLightTheme ? 'text-gray-500 hover:text-gray-700' : 'text-gray-500 hover:text-gray-300'}`} />
                       </motion.button>
                     </motion.div>
                   ))}
@@ -289,7 +294,7 @@ const Navbar = () => {
               <span className="text-xs text-gray-500">
                 {formatDate(currentTime)}
               </span>
-              <span className="text-sm font-medium text-gray-300">
+              <span className={`text-sm font-medium ${isLightTheme ? 'text-gray-700' : 'text-gray-300'}`}>
                 {formatTime(currentTime)}
               </span>
             </div>
@@ -298,10 +303,10 @@ const Navbar = () => {
             <motion.button
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-xl bg-gray-800/50 hover:bg-gray-800 text-gray-300 transition-colors"
-              onClick={toggleTheme}
+              className={`p-2 rounded-xl ${isLightTheme ? 'bg-gray-200/50 hover:bg-gray-300 text-gray-700' : 'bg-gray-800/50 hover:bg-gray-800 text-gray-300'} transition-colors`}
+              onClick={handleThemeToggle}
             >
-              {isDarkMode ? (
+              {!isLightTheme ? (
                 <Sun className="h-4.5 w-4.5" />
               ) : (
                 <Moon className="h-4.5 w-4.5" />
@@ -313,7 +318,7 @@ const Navbar = () => {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-xl bg-gray-800/50 hover:bg-gray-800 text-gray-300 transition-colors"
+                className={`p-2 rounded-xl ${isLightTheme ? 'bg-gray-200/50 hover:bg-gray-300 text-gray-700' : 'bg-gray-800/50 hover:bg-gray-800 text-gray-300'} transition-colors`}
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 <Bell className="h-4.5 w-4.5" />
@@ -332,10 +337,10 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -5, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-full mt-2 w-72 bg-gray-900/95 border border-gray-800/60 rounded-lg shadow-xl z-50 backdrop-blur-sm overflow-hidden"
+                    className={`absolute right-0 top-full mt-2 w-72 ${isLightTheme ? 'bg-gray-100/95 border border-gray-300/60' : 'bg-gray-900/95 border border-gray-800/60'} rounded-lg shadow-xl z-50 backdrop-blur-sm overflow-hidden`}
                   >
-                    <div className="p-3 border-b border-gray-800/60 flex justify-between items-center">
-                      <h3 className="text-sm font-medium text-gray-300">
+                    <div className={`p-3 ${isLightTheme ? 'border-b border-gray-300/60' : 'border-b border-gray-800/60'} flex justify-between items-center`}>
+                      <h3 className={`text-sm font-medium ${isLightTheme ? 'text-gray-700' : 'text-gray-300'}`}>
                         Notifications
                       </h3>
                       <button
@@ -392,7 +397,7 @@ const Navbar = () => {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-xl bg-gray-800/50 hover:bg-gray-800 text-gray-300 transition-colors"
+              className={`p-2 rounded-xl ${isLightTheme ? 'bg-gray-200/50 hover:bg-gray-300 text-gray-700' : 'bg-gray-800/50 hover:bg-gray-800 text-gray-300'} transition-colors`}
               onClick={() => navigate("/settings")}
             >
               <Settings className="h-4.5 w-4.5" />
@@ -402,10 +407,10 @@ const Navbar = () => {
             <div className="relative" ref={profileMenuRef}>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="flex items-center gap-2 group cursor-pointer pl-2 pr-1 py-1 rounded-lg hover:bg-gray-800/70 transition-colors"
+                className={`flex items-center gap-2 group cursor-pointer pl-2 pr-1 py-1 rounded-lg ${isLightTheme ? 'hover:bg-gray-200/70' : 'hover:bg-gray-800/70'} transition-colors`}
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
-                <span className="text-sm font-medium text-gray-300 hidden md:block">
+                <span className={`text-sm font-medium ${isLightTheme ? 'text-gray-700' : 'text-gray-300'} hidden md:block`}>
                   {user?.username || "Guest"}
                 </span>
                 <div className="relative">
@@ -422,7 +427,7 @@ const Navbar = () => {
                   />
                 </div>
                 <ChevronDown
-                  className="h-4 w-4 text-gray-500 transition-transform duration-300"
+                  className={`h-4 w-4 ${isLightTheme ? 'text-gray-500' : 'text-gray-500'} transition-transform duration-300`}
                   style={{
                     transform: showProfileMenu
                       ? "rotate(180deg)"
@@ -439,10 +444,10 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -5, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-full mt-2 w-56 bg-gray-900/95 border border-gray-800/60 rounded-lg shadow-xl z-50 backdrop-blur-sm overflow-hidden"
+                    className={`absolute right-0 top-full mt-2 w-56 ${isLightTheme ? 'bg-gray-100/95 border border-gray-300/60' : 'bg-gray-900/95 border border-gray-800/60'} rounded-lg shadow-xl z-50 backdrop-blur-sm overflow-hidden`}
                   >
                     {/* User Info Card */}
-                    <div className="p-4 border-b border-gray-800/60">
+                    <div className={`p-4 ${isLightTheme ? 'border-b border-gray-300/60' : 'border-b border-gray-800/60'}`}>
                       <div className="flex items-center gap-3 mb-3">
                         <div
                           className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 
@@ -451,7 +456,7 @@ const Navbar = () => {
                           {user?.username?.[0]?.toUpperCase() || "G"}
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-300">
+                          <div className={`text-sm font-medium ${isLightTheme ? 'text-gray-700' : 'text-gray-300'}`}>
                             {user?.username || "Guest"}
                           </div>
                           <div className="text-xs text-gray-500">
@@ -460,7 +465,7 @@ const Navbar = () => {
                         </div>
                       </div>
 
-                      <div className="bg-gray-800/50 rounded-md p-2 text-center">
+                      <div className={`${isLightTheme ? 'bg-gray-200/50' : 'bg-gray-800/50'} rounded-md p-2 text-center`}>
                         <div className="text-xs text-gray-500">Membership</div>
                         <div className="text-sm text-blue-400 font-medium">
                           Premium
@@ -471,39 +476,39 @@ const Navbar = () => {
                     {/* Menu Options */}
                     <div className="py-1">
                       <div
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-800/70 cursor-pointer text-sm text-gray-300"
+                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
                         onClick={handleProfileClick}
                       >
-                        <User className="h-4 w-4 text-gray-400" />
+                        <User className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
                         Profile
                       </div>
                       <div
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-800/70 cursor-pointer text-sm text-gray-300"
+                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
                         onClick={() => navigate("/settings")}
                       >
-                        <Settings className="h-4 w-4 text-gray-400" />
+                        <Settings className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
                         Settings
                       </div>
                       <div
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-800/70 cursor-pointer text-sm text-gray-300"
+                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
                         onClick={() => navigate("/bookshelf")}
                       >
-                        <BookOpen className="h-4 w-4 text-gray-400" />
+                        <BookOpen className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
                         My Resources
                       </div>
                       <div
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-800/70 cursor-pointer text-sm text-gray-300"
+                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
                         onClick={() => navigate("/privacy")}
                       >
-                        <Shield className="h-4 w-4 text-gray-400" />
+                        <Shield className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
                         Privacy
                       </div>
                     </div>
 
                     {/* Logout */}
-                    <div className="border-t border-gray-800/60 py-2">
+                    <div className={`${isLightTheme ? 'border-t border-gray-300/60' : 'border-t border-gray-800/60'} py-2`}>
                       <div
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-800/70 cursor-pointer text-sm text-red-400"
+                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70' : 'hover:bg-gray-800/70'} cursor-pointer text-sm text-red-400`}
                         onClick={handleLogout}
                       >
                         <LogOut className="h-4 w-4" />
@@ -519,8 +524,8 @@ const Navbar = () => {
       </div>
 
       {/* Ambient Light Effects */}
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400/20 to-transparent" />
-      <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-purple-400/10 to-transparent" />
+      <div className={`absolute bottom-0 left-0 w-full h-px ${isLightTheme ? 'bg-gradient-to-r from-transparent via-blue-400/10 to-transparent' : 'bg-gradient-to-r from-transparent via-blue-400/20 to-transparent'}`} />
+      <div className={`absolute top-0 left-1/4 w-1/2 h-px ${isLightTheme ? 'bg-gradient-to-r from-transparent via-purple-400/5 to-transparent' : 'bg-gradient-to-r from-transparent via-purple-400/10 to-transparent'}`} />
     </motion.nav>
   );
 };
