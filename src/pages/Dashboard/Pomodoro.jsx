@@ -23,7 +23,7 @@ const Pomodoro = ({
   resetTimer,
   formatTimeLeft,
 }) => {
-  // If props aren't provided, use local state (for standalone use)
+  // Local state if external control is not provided
   const [localWorkTime, setLocalWorkTime] = React.useState(workTime);
   const [localBreakTime, setLocalBreakTime] = React.useState(breakTime);
   const [localTimeLeft, setLocalTimeLeft] = React.useState(localWorkTime * 60);
@@ -31,23 +31,21 @@ const Pomodoro = ({
   const [localIsBreak, setLocalIsBreak] = React.useState(false);
   const [localCurrentTask, setLocalCurrentTask] = React.useState(null);
   const [sessionCount, setSessionCount] = React.useState(0);
-  const [debugLastClicked, setDebugLastClicked] = React.useState(""); // Fixed typo in variable name
 
-  // Use props if available, otherwise use local state
-  const effectiveWorkTime =
-    typeof workTime !== "undefined" ? workTime : localWorkTime;
-  const effectiveBreakTime =
-    typeof breakTime !== "undefined" ? breakTime : localBreakTime;
-  const effectiveTimeLeft = timeLeft !== undefined ? timeLeft : localTimeLeft;
-  const effectiveIsActive =
-    typeof isActive !== "undefined" ? isActive : localIsActive;
-  const effectiveIsBreak =
-    typeof isBreak !== "undefined" ? isBreak : localIsBreak;
+  // Auto-start the next session when one ends
+  const autoStartNextSession = true;
+
+  // Decide whether to use external (controlled) values or local state
+  const effectiveWorkTime = toggleTimer ? workTime : localWorkTime;
+  const effectiveBreakTime = toggleTimer ? breakTime : localBreakTime;
+  const effectiveTimeLeft =
+    toggleTimer && timeLeft !== undefined ? timeLeft : localTimeLeft;
+  const effectiveIsActive = toggleTimer ? isActive : localIsActive;
+  const effectiveIsBreak = toggleTimer ? isBreak : localIsBreak;
   const effectiveCurrentTask = currentTask || localCurrentTask;
 
   const formatTime = (seconds) => {
     if (formatTimeLeft) return formatTimeLeft();
-
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs
@@ -55,9 +53,22 @@ const Pomodoro = ({
       .padStart(2, "0")}`;
   };
 
-  // Countdown logic using useEffect - only use if props aren't provided
+  // Update timeLeft when work/break durations change and timer is stopped
   React.useEffect(() => {
-    if (toggleTimer) return; // Skip if using props
+    if (!effectiveIsActive && !effectiveIsBreak) {
+      setLocalTimeLeft(localWorkTime * 60);
+    }
+  }, [localWorkTime, effectiveIsActive, effectiveIsBreak]);
+
+  React.useEffect(() => {
+    if (!effectiveIsActive && effectiveIsBreak) {
+      setLocalTimeLeft(localBreakTime * 60);
+    }
+  }, [localBreakTime, effectiveIsActive, effectiveIsBreak]);
+
+  // Countdown logic – only use if external control isn’t provided
+  React.useEffect(() => {
+    if (toggleTimer) return;
 
     let interval = null;
     if (localIsActive && localTimeLeft > 0) {
@@ -65,23 +76,24 @@ const Pomodoro = ({
         setLocalTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
     } else if (localIsActive && localTimeLeft === 0) {
-      // Play sound
+      // Play sound notification
       new Audio("/notification.mp3")
         .play()
         .catch((err) => console.log("Audio playback prevented:", err));
 
-      // Switch sessions
+      // Switch sessions when time runs out
       if (!localIsBreak) {
-        // Work session ended; start break session.
+        // Work session ended; switch to break session.
         setLocalIsBreak(true);
         setLocalTimeLeft(localBreakTime * 60);
         setSessionCount((prev) => prev + 1);
       } else {
-        // Break session ended; start work session.
+        // Break session ended; switch back to work.
         setLocalIsBreak(false);
         setLocalTimeLeft(localWorkTime * 60);
       }
-      setLocalIsActive(false); // Pause timer after switching sessions
+      // Auto-start the next session if enabled, otherwise pause.
+      setLocalIsActive(autoStartNextSession);
     }
     return () => clearInterval(interval);
   }, [
@@ -91,125 +103,98 @@ const Pomodoro = ({
     localBreakTime,
     localWorkTime,
     toggleTimer,
+    autoStartNextSession,
   ]);
 
-  // Handle local timer toggle
-  // Handle local timer toggle
+  // Timer control handlers
   const handleToggleTimer = () => {
-    // If an external toggle function exists, use it; otherwise, toggle local state.
-    toggleTimer ? toggleTimer() : setLocalIsActive((prev) => !prev);
-  };
-
-  // Handle local reset
-  const handleReset = () => {
-    // If an external reset function exists, use it; otherwise, reset local state.
-    resetTimer
-      ? resetTimer()
-      : (() => {
-          setLocalTimeLeft(localWorkTime * 60);
-          setLocalIsActive(false);
-          setLocalIsBreak(false);
-          setLocalCurrentTask(null);
-        })();
-  };
-
-  // Handler for work time decrease
-  const handleWorkTimeDecrease = () => {
-    if (effectiveIsActive) return; // prevent changes while timer is active
-
-    // Only update if no external toggle is controlling the state.
-    if (!toggleTimer) {
-      setLocalWorkTime((prev) => {
-        const newValue = Math.max(1, prev - 1);
-        // If currently in work mode and not active, update the timer display.
-        if (!localIsBreak) {
-          setLocalTimeLeft(newValue * 60);
-        }
-        return newValue;
-      });
+    if (toggleTimer) {
+      toggleTimer();
+    } else {
+      setLocalIsActive((prev) => !prev);
     }
   };
 
-  // Handler for work time increase
+  const handleReset = () => {
+    if (resetTimer) {
+      resetTimer();
+    } else {
+      setLocalTimeLeft(localWorkTime * 60);
+      setLocalIsActive(false);
+      setLocalIsBreak(false);
+      setLocalCurrentTask(null);
+    }
+  };
+
+  // Time adjustment handlers (standalone mode only)
+  const handleWorkTimeDecrease = () => {
+    if (effectiveIsActive) return;
+    if (!toggleTimer) {
+      const newValue = Math.max(1, localWorkTime - 1);
+      setLocalWorkTime(newValue);
+      if (!localIsActive && !localIsBreak) {
+        setLocalTimeLeft(newValue * 60);
+      }
+    }
+  };
+
   const handleWorkTimeIncrease = () => {
     if (effectiveIsActive) return;
-
     if (!toggleTimer) {
-      setLocalWorkTime((prev) => {
-        const newValue = Math.min(60, prev + 1);
-        if (!localIsBreak) {
-          setLocalTimeLeft(newValue * 60);
-        }
-        return newValue;
-      });
+      const newValue = Math.min(99, localWorkTime + 1);
+      setLocalWorkTime(newValue);
+      if (!localIsActive && !localIsBreak) {
+        setLocalTimeLeft(newValue * 60);
+      }
     }
   };
 
-  // Handler for break time decrease
   const handleBreakTimeDecrease = () => {
     if (effectiveIsActive) return;
-
     if (!toggleTimer) {
-      setLocalBreakTime((prev) => {
-        const newValue = Math.max(1, prev - 1);
-        // If currently in break mode, update the timer display.
-        if (localIsBreak) {
-          setLocalTimeLeft(newValue * 60);
-        }
-        return newValue;
-      });
+      const newValue = Math.max(1, localBreakTime - 1);
+      setLocalBreakTime(newValue);
+      if (!localIsActive && localIsBreak) {
+        setLocalTimeLeft(newValue * 60);
+      }
     }
   };
 
-  // Handler for break time increase
   const handleBreakTimeIncrease = () => {
     if (effectiveIsActive) return;
-
     if (!toggleTimer) {
-      setLocalBreakTime((prev) => {
-        const newValue = Math.min(30, prev + 1);
-        if (localIsBreak) {
-          setLocalTimeLeft(newValue * 60);
-        }
-        return newValue;
-      });
+      const newValue = Math.min(99, localBreakTime + 1);
+      setLocalBreakTime(newValue);
+      if (!localIsActive && localIsBreak) {
+        setLocalTimeLeft(newValue * 60);
+      }
     }
   };
 
-  // Calculate progress percentage
+  // Calculate progress percentage for the animated progress bar
   const maxTime =
     (effectiveIsBreak ? effectiveBreakTime : effectiveWorkTime) * 60;
   const progressPercentage = (effectiveTimeLeft / maxTime) * 100;
 
-  // Get current task name if available
+  // Retrieve current task name if available
   const currentTaskName =
     effectiveCurrentTask && todos.length > 0
       ? todos.find((t) => t.id === effectiveCurrentTask)?.title
       : null;
 
-  // Enhanced color scheme
+  // Define color schemes for work and break sessions
   const colors = {
     work: {
-      primary: "rgba(168, 85, 247, 0.8)", // Purple
-      secondary: "rgba(139, 92, 246, 0.8)", // Violet
       bg: "from-purple-900/20 via-violet-900/15 to-purple-900/5",
       glow: "rgba(168, 85, 247, 0.15)",
       progress: "bg-gradient-to-r from-purple-500 to-violet-500",
-      buttonActive: "bg-gradient-to-br from-purple-500 to-violet-600",
-      buttonInactive: "bg-gradient-to-br from-green-500 to-emerald-600",
-      ring: "ring-purple-500/30",
       border: "border-purple-500/30",
       hover: "hover:border-purple-500/50",
     },
     break: {
-      primary: "rgba(59, 130, 246, 0.8)", // Blue
-      secondary: "rgba(14, 165, 233, 0.8)", // Sky
       bg: "from-blue-900/20 via-sky-900/15 to-blue-900/5",
       glow: "rgba(59, 130, 246, 0.15)",
       progress: "bg-gradient-to-r from-blue-500 to-sky-500",
-      buttonActive: "bg-gradient-to-br from-red-500 to-rose-600",
-      buttonInactive: "bg-gradient-to-br from-green-500 to-emerald-600",
-      ring: "ring-blue-500/30",
       border: "border-blue-500/30",
       hover: "hover:border-blue-500/50",
     },
@@ -270,7 +255,7 @@ const Pomodoro = ({
               )}
             </div>
 
-            {/* Time display with enhanced animation */}
+            {/* Animated time display */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={effectiveTimeLeft}
@@ -292,7 +277,7 @@ const Pomodoro = ({
             </AnimatePresence>
           </div>
 
-          {/* Enhanced progress bar */}
+          {/* Progress Bar */}
           <div className="w-full h-3 bg-gray-800/50 rounded-full overflow-hidden p-0.5">
             <motion.div
               className={`h-full rounded-full ${currentColors.progress}`}
@@ -309,52 +294,35 @@ const Pomodoro = ({
             />
           </div>
 
-          {/* Beautifully styled time control units */}
+          {/* Time Control Units */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Work time controller */}
+            {/* Work Time Controller */}
             <div className="relative">
               <label className="text-xs text-gray-400 mb-1.5 block font-medium flex items-center justify-between">
                 <span>Work Duration</span>
-                <span
-                  className={`px-1.5 py-0.5 rounded text-xs ${
-                    effectiveIsBreak
-                      ? "bg-blue-500/20 text-blue-200"
-                      : "bg-purple-500/20 text-purple-200"
-                  }`}
-                >
+                <span className="px-1.5 py-0.5 rounded text-xs bg-purple-500/20 text-purple-200">
                   min
                 </span>
               </label>
 
               <div
-                className={`
-                flex items-center justify-between rounded-xl p-1
-                ${
+                className={`flex items-center justify-between rounded-xl p-1 ${
                   !effectiveIsActive
                     ? "bg-gray-800/30 backdrop-blur-sm"
                     : "bg-gray-800/20"
-                }
-                ${effectiveIsBreak ? colors.break.border : colors.work.border} 
-                border
-                ${effectiveIsBreak ? colors.break.hover : colors.work.hover}
-                ${effectiveIsActive ? "opacity-70" : ""}
-                transition-all duration-300
-              `}
+                } ${currentColors.border} border ${currentColors.hover} ${
+                  effectiveIsActive ? "opacity-70" : ""
+                } transition-all duration-300`}
               >
-                {/* Work time buttons - Fixed */}
                 <button
                   type="button"
                   onClick={handleWorkTimeDecrease}
                   disabled={effectiveIsActive}
-                  className={`
-                    w-9 h-9 flex items-center justify-center rounded-lg 
-                    ${
-                      !effectiveIsActive
-                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-                    }
-                    transition-colors
-                  `}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                    !effectiveIsActive
+                      ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                      : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                  }`}
                 >
                   <Minus size={16} />
                 </button>
@@ -365,86 +333,59 @@ const Pomodoro = ({
                   type="button"
                   onClick={handleWorkTimeIncrease}
                   disabled={effectiveIsActive}
-                  className={`
-                    w-9 h-9 flex items-center justify-center rounded-lg
-                    ${
-                      !effectiveIsActive
-                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-                    }
-                    transition-colors
-                  `}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                    !effectiveIsActive
+                      ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                      : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                  }`}
                 >
                   <Plus size={16} />
                 </button>
               </div>
             </div>
 
-            {/* Break time controller */}
+            {/* Break Time Controller */}
             <div className="relative">
               <label className="text-xs text-gray-400 mb-1.5 block font-medium flex items-center justify-between">
                 <span>Break Duration</span>
-                <span
-                  className={`px-1.5 py-0.5 rounded text-xs ${
-                    effectiveIsBreak
-                      ? "bg-blue-500/20 text-blue-200"
-                      : "bg-purple-500/20 text-purple-200"
-                  }`}
-                >
+                <span className="px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-200">
                   min
                 </span>
               </label>
 
               <div
-                className={`
-                flex items-center justify-between rounded-xl p-1
-                ${
+                className={`flex items-center justify-between rounded-xl p-1 ${
                   !effectiveIsActive
                     ? "bg-gray-800/30 backdrop-blur-sm"
                     : "bg-gray-800/20"
-                }
-                ${effectiveIsBreak ? colors.break.border : colors.work.border} 
-                border
-                ${effectiveIsBreak ? colors.break.hover : colors.work.hover}
-                ${effectiveIsActive ? "opacity-70" : ""}
-                transition-all duration-300
-              `}
+                } ${currentColors.border} border ${currentColors.hover} ${
+                  effectiveIsActive ? "opacity-70" : ""
+                } transition-all duration-300`}
               >
-                {/* Break time buttons - Fixed */}
                 <button
                   type="button"
                   onClick={handleBreakTimeDecrease}
                   disabled={effectiveIsActive}
-                  className={`
-                    w-9 h-9 flex items-center justify-center rounded-lg 
-                    ${
-                      !effectiveIsActive
-                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-                    }
-                    transition-colors
-                  `}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                    !effectiveIsActive
+                      ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                      : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                  }`}
                 >
                   <Minus size={16} />
                 </button>
-
                 <div className="text-center w-10 text-xl font-medium text-white tabular-nums">
                   {toggleTimer ? effectiveBreakTime : localBreakTime}
                 </div>
-
                 <button
                   type="button"
                   onClick={handleBreakTimeIncrease}
                   disabled={effectiveIsActive}
-                  className={`
-                    w-9 h-9 flex items-center justify-center rounded-lg
-                    ${
-                      !effectiveIsActive
-                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-                    }
-                    transition-colors
-                  `}
+                  className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${
+                    !effectiveIsActive
+                      ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                      : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                  }`}
                 >
                   <Plus size={16} />
                 </button>
@@ -452,7 +393,7 @@ const Pomodoro = ({
             </div>
           </div>
 
-          {/* Enhanced buttons */}
+          {/* Control Buttons */}
           <div className="flex gap-4 justify-center mt-2">
             <motion.button
               whileHover={{
@@ -465,12 +406,11 @@ const Pomodoro = ({
               }}
               whileTap={{ scale: 0.95 }}
               onClick={handleToggleTimer}
-              className={`flex items-center justify-center w-16 h-16 rounded-full 
-                ${
-                  effectiveIsActive
-                    ? "bg-gradient-to-br from-red-500 to-rose-600 text-white"
-                    : "bg-gradient-to-br from-green-500 to-emerald-600 text-white"
-                } transition-all duration-200 shadow-xl`}
+              className={`flex items-center justify-center w-16 h-16 rounded-full transition-all duration-200 shadow-xl ${
+                effectiveIsActive
+                  ? "bg-gradient-to-br from-red-500 to-rose-600 text-white"
+                  : "bg-gradient-to-br from-green-500 to-emerald-600 text-white"
+              }`}
               style={{
                 boxShadow: `0 10px 15px -3px ${
                   effectiveIsActive
@@ -507,7 +447,7 @@ const Pomodoro = ({
             </motion.button>
           </div>
 
-          {/* Session counter with enhanced styling */}
+          {/* Session Counter */}
           {sessionCount > 0 && !toggleTimer && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -520,17 +460,11 @@ const Pomodoro = ({
                     effectiveIsBreak ? "bg-blue-400" : "bg-purple-400"
                   } animate-pulse`}
                 ></span>
-                {sessionCount} {sessionCount === 1 ? "session" : "sessions"}{" "}
-                completed
+                {sessionCount} {sessionCount === 1 ? "session" : "sessions"} completed
               </span>
             </motion.div>
           )}
         </div>
-        {debugLastClicked && (
-          <div className="absolute top-0 right-0 bg-red-500 text-white p-2 text-xs">
-            Last clicked: {debugLastClicked}
-          </div>
-        )}
       </SpotlightCard>
     </motion.div>
   );

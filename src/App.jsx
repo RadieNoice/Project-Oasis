@@ -24,7 +24,7 @@ const Profile = React.lazy(() => import("./pages/Profile.jsx"));
 const Setting = React.lazy(() => import("./pages/Settings.jsx"));
 const Landing = React.lazy(() => import("./pages/LandingPage.jsx"));
 const LoginRegister = React.lazy(() =>
-  import("./pages/Login&Register/LoginRegister.jsx")
+  import("./pages/Login/LoginRegister.jsx")
 );
 
 const pageVariants = {
