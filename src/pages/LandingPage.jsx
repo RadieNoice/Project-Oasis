@@ -26,16 +26,9 @@ const Landing = () => {
     {
       title: "Task Management",
       description:
-        "Organize tasks, set priorities, and track progress with intuitive tools.",
+        "Organize your study tasks with our intuitive task management system.",
       icon: "📋",
       color: "from-blue-600 to-blue-800",
-    },
-    {
-      title: "Pomodoro Timer",
-      description:
-        "Boost focus with customizable time blocks optimized for deep work.",
-      icon: "⏱",
-      color: "from-purple-600 to-purple-800",
     },
     {
       title: "AI Assistance",

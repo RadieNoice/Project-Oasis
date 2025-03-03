@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar as CalendarIcon, Play, Plus, Trash2, Filter, Clock, CheckSquare, AlertTriangle } from "lucide-react";
+import { Calendar as CalendarIcon, Play, Plus, Trash2, Filter, Clock, CheckSquare, AlertTriangle, Pause, RotateCcw } from "lucide-react";
 import SpotlightCard from "../../components/reactbits/SpotlightCard";
 
 const TaskManager = ({ 
   todos, 
   setTodos, 
-  currentTask, 
-  setCurrentTask, 
-  isActive, 
-  setIsActive, 
+  taskTimers,
+  activeTimers,
+  isBreakTimers,
   workTime,
   newTodo,
   setNewTodo,
@@ -18,6 +17,9 @@ const TaskManager = ({
   dueDate,
   setDueDate,
   addTodo,
+  toggleTimer,
+  resetTimer,
+  formatTimeLeft,
   getProgress
 }) => {
   const [filter, setFilter] = useState("all"); // all, active, completed
@@ -52,72 +54,47 @@ const TaskManager = ({
     return true;
   });
   
-  // Stats for the task list
+  // Calculate task stats
   const totalTasks = todos.length;
-  const completedTasks = todos.filter(t => t.completedSessions >= 4).length;
-  const activeTasks = totalTasks - completedTasks;
+  const completedTasks = todos.filter(todo => todo.completedSessions >= 4).length;
   
-  // Due today count
+  // Get today's date in YYYY-MM-DD format for comparison
   const today = new Date().toISOString().split('T')[0];
-  const dueTodayCount = todos.filter(t => 
-    t.dueDate === today && t.completedSessions < 4
+  
+  // Count tasks due today
+  const dueTodayCount = todos.filter(todo => 
+    todo.dueDate && 
+    new Date(todo.dueDate).toISOString().split('T')[0] === today &&
+    todo.completedSessions < 4
   ).length;
-
-  // Enhanced form submission that provides visual feedback
+  
+  // Handle adding a new todo
   const handleAddTodo = (e) => {
     e.preventDefault();
-    if (!newTodo.trim()) return;
+    addTodo(e);
     
-    // Generate a unique ID for the new task
-    const newId = crypto.randomUUID();
-    
-    // Create the new todo object
-    const todo = {
-      id: newId,
-      title: newTodo,
-      dueDate: dueDate || null,
-      priority,
-      completedSessions: 0,
-      estimatedSessions: 4,
-      createdAt: new Date().toISOString(),
-    };
-    
-    // Update the todos list
-    setTodos(prevTodos => [...prevTodos, todo]);
-    
-    // Clear the form
-    setNewTodo("");
-    setDueDate("");
-    setPriority("medium");
-    
-    // Set this as the just added task for highlighting
-    setJustAdded(newId);
+    // Highlight the newly added task
+    const newTodoId = crypto.randomUUID(); // This should match the ID generation in addTodo
+    setJustAdded(newTodoId);
     
     // Clear the highlight after 2 seconds
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setJustAdded(null);
     }, 2000);
     
-    // If using the parent component's addTodo function
-    // Don't pass the event to avoid conflicts with parent component
-    if (typeof addTodo === 'function') {
-      // Create a new synthetic event to avoid issues with event pooling
-      const syntheticEvent = { preventDefault: () => {} };
-      addTodo(syntheticEvent);
-    }
+    return () => clearTimeout(timeout);
   };
-
-  // Handle task completion toggle
+  
+  // Toggle task completion status
   const toggleTaskCompletion = (todoId) => {
     setTodos(
-      todos.map((todo) =>
-        todo.id === todoId
-          ? { 
-              ...todo, 
-              completedSessions: todo.completedSessions >= 4 ? 0 : 4 
-            }
-          : todo
-      )
+      todos.map((todo) => {
+        if (todo.id === todoId) {
+          const newCompletedSessions = todo.completedSessions >= 4 ? 0 : 4;
+          return { ...todo, completedSessions: newCompletedSessions };
+        }
+        return todo;
+      })
     );
   };
 
@@ -129,26 +106,13 @@ const TaskManager = ({
       return; // Don't proceed if task doesn't exist or is completed
     }
     
-    // If a task is already active and it's not this task, confirm before switching
-    if (isActive && currentTask !== todoId) {
-      if (window.confirm("Stop current task and start this one?")) {
-        setCurrentTask(todoId);
-        setIsActive(true);
-      }
-    } else {
-      setCurrentTask(todoId);
-      setIsActive(true);
-    }
+    toggleTimer(todoId);
   };
 
   // Handle deleting a task
   const handleDeleteTask = (todoId) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       setTodos(todos.filter((t) => t.id !== todoId));
-      if (currentTask === todoId) {
-        setCurrentTask(null);
-        setIsActive(false);
-      }
     }
   };
 
@@ -169,11 +133,13 @@ const TaskManager = ({
         className="bg-gradient-to-br from-gray-900/70 to-gray-900/40 rounded-2xl border border-gray-800/30 backdrop-blur-lg p-6"
         spotlightColor="rgba(255, 255, 255, 0.10)"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Task Manager</h2>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">
+            Task Manager
+          </h2>
           
-          {totalTasks > 0 && (
-            <div className="flex gap-2 text-xs">
+          {todos.length > 0 && (
+            <div className="flex items-center gap-2 text-sm">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -196,7 +162,7 @@ const TaskManager = ({
                     : "bg-gray-800/40 text-gray-400 border border-gray-700/30"
                 }`}
               >
-                Active ({activeTasks})
+                Active ({totalTasks - completedTasks})
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -440,31 +406,66 @@ const TaskManager = ({
                               {Math.round(getProgress(todo.completedSessions))}%
                             </span>
                           </div>
+                          
+                          {/* Timer display */}
+                          {todo.completedSessions < 4 && taskTimers[todo.id] !== undefined && (
+                            <div className="flex items-center gap-1 ml-auto">
+                              <div className={`px-3 py-1 rounded-lg ${
+                                activeTimers[todo.id] 
+                                  ? isBreakTimers[todo.id]
+                                    ? "bg-green-500/20 text-green-300"
+                                    : "bg-purple-500/20 text-purple-300"
+                                  : "bg-gray-700/40 text-gray-300"
+                              }`}>
+                                <span className="font-mono">
+                                  {formatTimeLeft(taskTimers[todo.id])}
+                                </span>
+                                <span className="ml-1 text-xs">
+                                  {isBreakTimers[todo.id] ? "(break)" : "(work)"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleStartTask(todo.id)}
-                          disabled={todo.completedSessions >= 4}
-                          className={`p-2 rounded-lg transition-all ${
-                            todo.completedSessions >= 4
-                              ? "bg-gray-700/30 text-gray-500 cursor-not-allowed"
-                              : currentTask === todo.id
-                              ? "bg-purple-500/40 hover:bg-purple-500/50 text-purple-300 shadow-sm"
-                              : "bg-gray-700/40 hover:bg-gray-700/60 text-gray-300 hover:text-white"
-                          }`}
-                          title={
-                            todo.completedSessions >= 4 
-                              ? "Completed tasks cannot be started" 
-                              : "Start this task"
-                          }
-                        >
-                          <Play className="h-5 w-5" />
-                        </motion.button>
-
+                        {todo.completedSessions < 4 && (
+                          <>
+                            {/* Play/Pause button */}
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => toggleTimer(todo.id)}
+                              className={`p-2 rounded-lg transition-all ${
+                                activeTimers[todo.id]
+                                  ? isBreakTimers[todo.id]
+                                    ? "bg-green-500/40 hover:bg-green-500/50 text-green-300 shadow-sm"
+                                    : "bg-purple-500/40 hover:bg-purple-500/50 text-purple-300 shadow-sm"
+                                  : "bg-gray-700/40 hover:bg-gray-700/60 text-gray-300 hover:text-white"
+                              }`}
+                              title={activeTimers[todo.id] ? "Pause timer" : "Start timer"}
+                            >
+                              {activeTimers[todo.id] ? (
+                                <Pause className="h-5 w-5" />
+                              ) : (
+                                <Play className="h-5 w-5" />
+                              )}
+                            </motion.button>
+                            
+                            {/* Reset button */}
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => resetTimer(todo.id)}
+                              className="p-2 text-gray-400 hover:text-blue-400 transition-colors hover:bg-blue-500/10 rounded-lg"
+                              title="Reset timer"
+                            >
+                              <RotateCcw className="h-5 w-5" />
+                            </motion.button>
+                          </>
+                        )}
+                        
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}

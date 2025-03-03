@@ -14,6 +14,7 @@ import {
   Shield,
   BookOpen,
   MousePointer,
+  Clock,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -40,6 +41,7 @@ const Navbar = () => {
   // Mapping of route paths to display labels and icons
   const pathLabels = {
     "/dashboard": { label: "Dashboard", icon: "grid" },
+    "/pomodoro": { label: "Pomodoro", icon: "clock" },
     "/calendar": { label: "Calendar", icon: "calendar" },
     "/bookshelf": { label: "Book Shelf", icon: "book" },
     "/ai-tools": { label: "AI Assistant", icon: "bot" },

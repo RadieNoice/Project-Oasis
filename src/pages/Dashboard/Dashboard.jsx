@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import SpotlightCard from "../../components/reactbits/SpotlightCard";
+import { Plus, Check, X, Play, Pause, RotateCcw } from "lucide-react";
 import StudyTimeToday from "./StudyTimeToday.jsx";
 import TasksCompleted from "./TasksCompleted.jsx";
 import CurrentStreak from "./CurrentStreak.jsx";
-import Pomodoro from "./Pomodoro.jsx";
 import { toast } from "react-hot-toast";
 import TaskManager from "./TaskManager.jsx";
 
@@ -16,10 +15,16 @@ const Dashboard = () => {
   const [breakTime, setBreakTime] = useState(() => {
     return parseInt(localStorage.getItem("breakTime")) || 5;
   });
-  const [timeLeft, setTimeLeft] = useState(() => workTime * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
-  const [currentTask, setCurrentTask] = useState(null);
+  
+  // Replace single timer with task-specific timers
+  const [taskTimers, setTaskTimers] = useState({});
+  const [activeTimers, setActiveTimers] = useState({});
+  const [isBreakTimers, setIsBreakTimers] = useState({});
+  
+  const [totalStudyTime, setTotalStudyTime] = useState(() => {
+    return parseInt(localStorage.getItem("totalStudyTime")) || 0;
+  });
+
   const [todos, setTodos] = useState(() => {
     try {
       const savedTodos = localStorage.getItem("todos");
@@ -32,9 +37,6 @@ const Dashboard = () => {
   const [newTodo, setNewTodo] = useState("");
   const [priority, setPriority] = useState("medium");
   const [dueDate, setDueDate] = useState("");
-  const [totalStudyTime, setTotalStudyTime] = useState(() => {
-    return parseInt(localStorage.getItem("totalStudyTime")) || 0;
-  });
 
   // Save todos to localStorage whenever they change
   useEffect(() => {
@@ -52,40 +54,110 @@ const Dashboard = () => {
     localStorage.setItem("totalStudyTime", totalStudyTime);
   }, [totalStudyTime]);
 
-  // Timer countdown logic
+  // Initialize timers for new tasks
   useEffect(() => {
-    let interval;
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-        
-        // Track study time if not in break mode
-        if (!isBreak) {
-          setTotalStudyTime(prev => prev + 1/60);
-        }
-      }, 1000);
-    } else if (isActive && timeLeft === 0) {
-      handleSessionEnd();
-      // Play notification sound and show toast
-      new Audio("/notification.mp3").play().catch(err => console.log("Audio playback prevented:", err));
-      toast.success(`${isBreak ? "Break time" : "Work session"} completed!`);
-    }
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft, isBreak]);
+    const newTaskTimers = { ...taskTimers };
+    const newIsBreakTimers = { ...isBreakTimers };
+    
+    todos.forEach(todo => {
+      if (!(todo.id in taskTimers)) {
+        newTaskTimers[todo.id] = workTime * 60;
+        newIsBreakTimers[todo.id] = false;
+      }
+    });
+    
+    // Remove timers for deleted tasks
+    Object.keys(taskTimers).forEach(id => {
+      if (!todos.find(todo => todo.id === id)) {
+        delete newTaskTimers[id];
+        delete newIsBreakTimers[id];
+      }
+    });
+    
+    setTaskTimers(newTaskTimers);
+    setIsBreakTimers(newIsBreakTimers);
+  }, [todos, workTime]);
 
-  const handleSessionEnd = () => {
-    setIsActive(false);
-    if (!isBreak && currentTask) {
+  // Timer countdown logic for all active timers
+  useEffect(() => {
+    let intervals = {};
+    
+    Object.entries(activeTimers).forEach(([todoId, isActive]) => {
+      if (isActive && taskTimers[todoId] > 0) {
+        intervals[todoId] = setInterval(() => {
+          setTaskTimers(prev => ({
+            ...prev,
+            [todoId]: prev[todoId] - 1
+          }));
+          
+          // Track study time if not in break mode
+          if (!isBreakTimers[todoId]) {
+            setTotalStudyTime(prev => prev + 1/60);
+          }
+        }, 1000);
+      } else if (isActive && taskTimers[todoId] === 0) {
+        handleSessionEnd(todoId);
+        // Play notification sound and show toast
+        new Audio("/notification.mp3").play().catch(err => console.log("Audio playback prevented:", err));
+        toast.success(`${isBreakTimers[todoId] ? "Break time" : "Work session"} completed for task!`);
+      }
+    });
+    
+    return () => {
+      Object.values(intervals).forEach(interval => clearInterval(interval));
+    };
+  }, [activeTimers, taskTimers, isBreakTimers]);
+
+  const handleSessionEnd = (todoId) => {
+    setActiveTimers(prev => ({
+      ...prev,
+      [todoId]: false
+    }));
+    
+    if (!isBreakTimers[todoId]) {
       setTodos(
         todos.map((todo) =>
-          todo.id === currentTask
+          todo.id === todoId
             ? { ...todo, completedSessions: todo.completedSessions + 1 }
             : todo
         )
       );
     }
-    setIsBreak(!isBreak);
-    setTimeLeft((isBreak ? workTime : breakTime) * 60);
+    
+    setIsBreakTimers(prev => ({
+      ...prev,
+      [todoId]: !prev[todoId]
+    }));
+    
+    setTaskTimers(prev => ({
+      ...prev,
+      [todoId]: (isBreakTimers[todoId] ? workTime : breakTime) * 60
+    }));
+  };
+
+  const toggleTimer = (todoId) => {
+    setActiveTimers(prev => ({
+      ...prev,
+      [todoId]: !prev[todoId]
+    }));
+  };
+
+  const resetTimer = (todoId) => {
+    setActiveTimers(prev => ({
+      ...prev,
+      [todoId]: false
+    }));
+    
+    setTaskTimers(prev => ({
+      ...prev,
+      [todoId]: (isBreakTimers[todoId] ? breakTime : workTime) * 60
+    }));
+  };
+
+  const formatTimeLeft = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const addTodo = (e) => {
@@ -107,21 +179,6 @@ const Dashboard = () => {
     toast.success("Task added successfully");
   };
 
-  const toggleTimer = () => {
-    setIsActive(!isActive);
-  };
-
-  const resetTimer = () => {
-    setIsActive(false);
-    setTimeLeft((isBreak ? breakTime : workTime) * 60);
-  };
-
-  const formatTimeLeft = () => {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
-
   const getProgress = (sessions) => (sessions / 4) * 100;
 
   return (
@@ -132,30 +189,15 @@ const Dashboard = () => {
         <StudyTimeToday todos={todos} workTime={workTime} totalStudyTime={totalStudyTime} />
         <TasksCompleted todos={todos} />
         <CurrentStreak />
-        
-        {/* Replace the inline timer with the Pomodoro component */}
-        <Pomodoro 
-          workTime={workTime}
-          breakTime={breakTime}
-          isActive={isActive}
-          isBreak={isBreak}
-          timeLeft={timeLeft}
-          currentTask={currentTask}
-          todos={todos}
-          toggleTimer={toggleTimer}
-          resetTimer={resetTimer}
-          formatTimeLeft={formatTimeLeft}
-        />
       </div>
 
       {/* Task Manager is now a separate component */}
       <TaskManager 
         todos={todos}
         setTodos={setTodos}
-        currentTask={currentTask}
-        setCurrentTask={setCurrentTask}
-        isActive={isActive}
-        setIsActive={setIsActive}
+        taskTimers={taskTimers}
+        activeTimers={activeTimers}
+        isBreakTimers={isBreakTimers}
         workTime={workTime}
         newTodo={newTodo}
         setNewTodo={setNewTodo}
@@ -164,6 +206,9 @@ const Dashboard = () => {
         dueDate={dueDate}
         setDueDate={setDueDate}
         addTodo={addTodo}
+        toggleTimer={toggleTimer}
+        resetTimer={resetTimer}
+        formatTimeLeft={formatTimeLeft}
         getProgress={getProgress}
       />
     </div>
