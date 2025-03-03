@@ -38,7 +38,7 @@ const Navbar = () => {
 
   // Mapping of route paths to display labels and icons
   const pathLabels = {
-    "/": { label: "Dashboard", icon: "grid" },
+    "/dashboard": { label: "Dashboard", icon: "grid" },
     "/calendar": { label: "Calendar", icon: "calendar" },
     "/bookshelf": { label: "Book Shelf", icon: "book" },
     "/ai-tools": { label: "AI Assistant", icon: "bot" },

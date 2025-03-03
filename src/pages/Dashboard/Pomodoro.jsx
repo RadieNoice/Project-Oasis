@@ -31,6 +31,7 @@ const Pomodoro = ({
   const [localIsBreak, setLocalIsBreak] = React.useState(false);
   const [localCurrentTask, setLocalCurrentTask] = React.useState(null);
   const [sessionCount, setSessionCount] = React.useState(0);
+  const [debugLastClicked, setDebugLastClicked] = React.useState(""); // Fixed typo in variable name
 
   // Use props if available, otherwise use local state
   const effectiveWorkTime =
@@ -43,7 +44,6 @@ const Pomodoro = ({
   const effectiveIsBreak =
     typeof isBreak !== "undefined" ? isBreak : localIsBreak;
   const effectiveCurrentTask = currentTask || localCurrentTask;
-  const [debugLastClicked, setDebugLastClicked] = React.useState("");
 
   const formatTime = (seconds) => {
     if (formatTimeLeft) return formatTimeLeft();
@@ -94,178 +94,88 @@ const Pomodoro = ({
   ]);
 
   // Handle local timer toggle
+  // Handle local timer toggle
   const handleToggleTimer = () => {
-    if (toggleTimer) {
-      toggleTimer();
-    } else {
-      setLocalIsActive(!localIsActive);
-    }
+    // If an external toggle function exists, use it; otherwise, toggle local state.
+    toggleTimer ? toggleTimer() : setLocalIsActive((prev) => !prev);
   };
 
   // Handle local reset
   const handleReset = () => {
-    if (resetTimer) {
-      resetTimer();
-    } else {
-      setLocalTimeLeft(localWorkTime * 60);
-      setLocalIsActive(false);
-      setLocalIsBreak(false);
-      setLocalCurrentTask(null);
-    }
+    // If an external reset function exists, use it; otherwise, reset local state.
+    resetTimer
+      ? resetTimer()
+      : (() => {
+          setLocalTimeLeft(localWorkTime * 60);
+          setLocalIsActive(false);
+          setLocalIsBreak(false);
+          setLocalCurrentTask(null);
+        })();
   };
 
-  // FIXED: Time adjustment handlers with more direct implementation
+  // Handler for work time decrease
   const handleWorkTimeDecrease = () => {
-    if (effectiveIsActive) return;
+    if (effectiveIsActive) return; // prevent changes while timer is active
 
-    if (typeof workTime === "undefined") {
-      // We're managing our own state
-      const newValue = Math.max(1, localWorkTime - 1);
-      setLocalWorkTime(newValue);
-
-      // Update timer display if in work mode
-      if (!localIsActive && !localIsBreak) {
-        setLocalTimeLeft(newValue * 60);
-      }
+    // Only update if no external toggle is controlling the state.
+    if (!toggleTimer) {
+      setLocalWorkTime((prev) => {
+        const newValue = Math.max(1, prev - 1);
+        // If currently in work mode and not active, update the timer display.
+        if (!localIsBreak) {
+          setLocalTimeLeft(newValue * 60);
+        }
+        return newValue;
+      });
     }
   };
 
+  // Handler for work time increase
   const handleWorkTimeIncrease = () => {
     if (effectiveIsActive) return;
 
-    if (typeof workTime === "undefined") {
-      // We're managing our own state
-      const newValue = Math.min(99, localWorkTime + 1);
-      setLocalWorkTime(newValue);
-
-      // Update timer display if in work mode
-      if (!localIsActive && !localIsBreak) {
-        setLocalTimeLeft(newValue * 60);
-      }
+    if (!toggleTimer) {
+      setLocalWorkTime((prev) => {
+        const newValue = Math.min(60, prev + 1);
+        if (!localIsBreak) {
+          setLocalTimeLeft(newValue * 60);
+        }
+        return newValue;
+      });
     }
   };
 
+  // Handler for break time decrease
   const handleBreakTimeDecrease = () => {
     if (effectiveIsActive) return;
 
-    if (typeof breakTime === "undefined") {
-      // We're managing our own state
-      const newValue = Math.max(1, localBreakTime - 1);
-      setLocalBreakTime(newValue);
-
-      // Update timer display if in break mode
-      if (!localIsActive && localIsBreak) {
-        setLocalTimeLeft(newValue * 60);
-      }
+    if (!toggleTimer) {
+      setLocalBreakTime((prev) => {
+        const newValue = Math.max(1, prev - 1);
+        // If currently in break mode, update the timer display.
+        if (localIsBreak) {
+          setLocalTimeLeft(newValue * 60);
+        }
+        return newValue;
+      });
     }
   };
 
+  // Handler for break time increase
   const handleBreakTimeIncrease = () => {
     if (effectiveIsActive) return;
 
-    if (typeof breakTime === "undefined") {
-      // We're managing our own state
-      const newValue = Math.min(99, localBreakTime + 1);
-      setLocalBreakTime(newValue);
-
-      // Update timer display if in break mode
-      if (!localIsActive && localIsBreak) {
-        setLocalTimeLeft(newValue * 60);
-      }
+    if (!toggleTimer) {
+      setLocalBreakTime((prev) => {
+        const newValue = Math.min(30, prev + 1);
+        if (localIsBreak) {
+          setLocalTimeLeft(newValue * 60);
+        }
+        return newValue;
+      });
     }
   };
 
-  // Add these debug handlers right after your other handlers
-  const debugWorkTimeDecrease = () => {
-    etDebugLastClicked(
-      "Work time decrease at " + new Date().toLocaleTimeString()
-    );
-    console.log("CLICKED: Work time decrease");
-    console.log("Current workTime:", localWorkTime);
-    console.log("effectiveIsActive:", effectiveIsActive);
-
-    if (effectiveIsActive) {
-      console.log("Can't adjust - timer is active");
-      return;
-    }
-
-    // Force update with direct setValue call
-    const newValue = Math.max(1, localWorkTime - 1);
-    console.log("Setting new work time:", newValue);
-    setLocalWorkTime(newValue);
-
-    // Update timer display if in work mode
-    if (!localIsActive && !localIsBreak) {
-      console.log("Updating timeLeft to:", newValue * 60);
-      setLocalTimeLeft(newValue * 60);
-    }
-  };
-
-  const debugWorkTimeIncrease = () => {
-    console.log("CLICKED: Work time increase");
-    console.log("Current workTime:", localWorkTime);
-    console.log("effectiveIsActive:", effectiveIsActive);
-
-    if (effectiveIsActive) {
-      console.log("Can't adjust - timer is active");
-      return;
-    }
-
-    // Force update with direct setValue call
-    const newValue = Math.min(99, localWorkTime + 1);
-    console.log("Setting new work time:", newValue);
-    setLocalWorkTime(newValue);
-
-    // Update timer display if in work mode
-    if (!localIsActive && !localIsBreak) {
-      console.log("Updating timeLeft to:", newValue * 60);
-      setLocalTimeLeft(newValue * 60);
-    }
-  };
-
-  const debugBreakTimeDecrease = () => {
-    console.log("CLICKED: Break time decrease");
-    console.log("Current breakTime:", localBreakTime);
-    console.log("effectiveIsActive:", effectiveIsActive);
-
-    if (effectiveIsActive) {
-      console.log("Can't adjust - timer is active");
-      return;
-    }
-
-    // Force update with direct setValue call
-    const newValue = Math.max(1, localBreakTime - 1);
-    console.log("Setting new break time:", newValue);
-    setLocalBreakTime(newValue);
-
-    // Update timer display if in break mode
-    if (!localIsActive && localIsBreak) {
-      console.log("Updating timeLeft to:", newValue * 60);
-      setLocalTimeLeft(newValue * 60);
-    }
-  };
-
-  const debugBreakTimeIncrease = () => {
-    console.log("CLICKED: Break time increase");
-    console.log("Current breakTime:", localBreakTime);
-    console.log("effectiveIsActive:", effectiveIsActive);
-
-    if (effectiveIsActive) {
-      console.log("Can't adjust - timer is active");
-      return;
-    }
-
-    // Force update with direct setValue call
-    const newValue = Math.min(99, localBreakTime + 1);
-    console.log("Setting new break time:", newValue);
-    setLocalBreakTime(newValue);
-
-    // Update timer display if in break mode
-    if (!localIsActive && localIsBreak) {
-      console.log("Updating timeLeft to:", newValue * 60);
-      setLocalTimeLeft(newValue * 60);
-    }
-  };
   // Calculate progress percentage
   const maxTime =
     (effectiveIsBreak ? effectiveBreakTime : effectiveWorkTime) * 60;
@@ -431,20 +341,20 @@ const Pomodoro = ({
                 transition-all duration-300
               `}
               >
-                // Work time buttons
+                {/* Work time buttons - Fixed */}
                 <button
                   type="button"
-                  onClick={debugWorkTimeDecrease}
+                  onClick={handleWorkTimeDecrease}
                   disabled={effectiveIsActive}
                   className={`
-    w-9 h-9 flex items-center justify-center rounded-lg 
-    ${
-      !effectiveIsActive
-        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-    }
-    transition-colors
-  `}
+                    w-9 h-9 flex items-center justify-center rounded-lg 
+                    ${
+                      !effectiveIsActive
+                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                    }
+                    transition-colors
+                  `}
                 >
                   <Minus size={16} />
                 </button>
@@ -453,17 +363,17 @@ const Pomodoro = ({
                 </div>
                 <button
                   type="button"
-                  onClick={debugWorkTimeIncrease}
+                  onClick={handleWorkTimeIncrease}
                   disabled={effectiveIsActive}
                   className={`
-    w-9 h-9 flex items-center justify-center rounded-lg
-    ${
-      !effectiveIsActive
-        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-    }
-    transition-colors
-  `}
+                    w-9 h-9 flex items-center justify-center rounded-lg
+                    ${
+                      !effectiveIsActive
+                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                    }
+                    transition-colors
+                  `}
                 >
                   <Plus size={16} />
                 </button>
@@ -500,20 +410,20 @@ const Pomodoro = ({
                 transition-all duration-300
               `}
               >
-                {/* FIXED: Direct event handlers */}
+                {/* Break time buttons - Fixed */}
                 <button
                   type="button"
-                  onClick={debugBreakTimeDecrease}
+                  onClick={handleBreakTimeDecrease}
                   disabled={effectiveIsActive}
                   className={`
-    w-9 h-9 flex items-center justify-center rounded-lg 
-    ${
-      !effectiveIsActive
-        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-    }
-    transition-colors
-  `}
+                    w-9 h-9 flex items-center justify-center rounded-lg 
+                    ${
+                      !effectiveIsActive
+                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                    }
+                    transition-colors
+                  `}
                 >
                   <Minus size={16} />
                 </button>
@@ -524,17 +434,17 @@ const Pomodoro = ({
 
                 <button
                   type="button"
-                  onClick={debugBreakTimeIncrease}
+                  onClick={handleBreakTimeIncrease}
                   disabled={effectiveIsActive}
                   className={`
-    w-9 h-9 flex items-center justify-center rounded-lg
-    ${
-      !effectiveIsActive
-        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
-        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
-    }
-    transition-colors
-  `}
+                    w-9 h-9 flex items-center justify-center rounded-lg
+                    ${
+                      !effectiveIsActive
+                        ? "text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800"
+                        : "text-gray-500 bg-gray-800/30 cursor-not-allowed"
+                    }
+                    transition-colors
+                  `}
                 >
                   <Plus size={16} />
                 </button>
