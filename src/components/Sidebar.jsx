@@ -36,7 +36,7 @@ const Sidebar = () => {
   }, [position]);
 
   const items = [
-    { icon: <Home className="text-blue-400" />, label: "Dashboard", path: "/" },
+    { icon: <Home className="text-blue-400" />, label: "Dashboard", path: "/dashboard" },
     {
       icon: <Calendar className="text-purple-400" />,
       label: "Calendar",
