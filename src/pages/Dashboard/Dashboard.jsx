@@ -206,37 +206,36 @@ const Dashboard = () => {
         <TasksCompleted todos={todos} />
         <CurrentStreak />
       </div>
-
-      {/* Separate box for PomodoroBox (swapped above main content) */}
-        <PomodoroBox/>
-
+      <div className="flex flex-row gap-4">
+        <div className="w-1/2">
+          <PomodoroBox />
+        </div>
+        <div className="w-1/2">
+          <MusicBox className="w-full" />
+        </div>
+      </div>
 
       {/* Main Content: TaskManager and MusicBox */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="md:basis-3/5 w-full">
-          <TaskManager
-            todos={todos}
-            setTodos={setTodos}
-            taskTimers={taskTimers}
-            activeTimers={activeTimers}
-            isBreakTimers={isBreakTimers}
-            workTime={workTime}
-            newTodo={newTodo}
-            setNewTodo={setNewTodo}
-            priority={priority}
-            setPriority={setPriority}
-            dueDate={dueDate}
-            setDueDate={setDueDate}
-            addTodo={addTodo}
-            toggleTimer={toggleTimer}
-            resetTimer={resetTimer}
-            formatTimeLeft={formatTimeLeft}
-            getProgress={getProgress}
-          />
-        </div>
-        <div className="md:basis-2/5 w-full">
-          <MusicBox className="w-full h-full" />
-        </div>
+      <div className="flex flex-col">
+        <TaskManager
+          todos={todos}
+          setTodos={setTodos}
+          taskTimers={taskTimers}
+          activeTimers={activeTimers}
+          isBreakTimers={isBreakTimers}
+          workTime={workTime}
+          newTodo={newTodo}
+          setNewTodo={setNewTodo}
+          priority={priority}
+          setPriority={setPriority}
+          dueDate={dueDate}
+          setDueDate={setDueDate}
+          addTodo={addTodo}
+          toggleTimer={toggleTimer}
+          resetTimer={resetTimer}
+          formatTimeLeft={formatTimeLeft}
+          getProgress={getProgress}
+        />
       </div>
     </div>
   );
