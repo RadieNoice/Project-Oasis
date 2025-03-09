@@ -28,6 +28,7 @@ const LoginRegister = React.lazy(() =>
   import("./pages/Login/LoginRegister.jsx")
 );
 const PomodoroPage = React.lazy(() => import("./pages/PomodoroPage.jsx"));
+const Music = React.lazy(() => import("./pages/Music.jsx"));
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
@@ -240,6 +241,23 @@ const AppRoutes = () => {
                 exit="exit"
               >
                 <Chat />
+              </motion.div>
+            </Layout>
+          }
+        />
+
+        {/* Music with Layout */}
+        <Route
+          path="music"
+          element={
+            <Layout>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <Music />
               </motion.div>
             </Layout>
           }

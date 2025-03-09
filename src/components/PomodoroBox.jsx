@@ -94,126 +94,83 @@ const PomodoroBox = ({ compact = false }) => {
   };
 
   return (
-    <div className={`${compact ? 'p-4' : 'p-6'} rounded-xl ${isLightTheme ? 'bg-white shadow-md border border-gray-200' : 'bg-gray-900/90 border border-gray-800/50'} transition-colors`}>
-      <div className="flex justify-between items-center mb-3">
-        <h2 className={`${compact ? 'text-lg' : 'text-xl'} font-bold ${isLightTheme ? 'text-gray-800' : 'text-white'}`}>
-          {isBreak ? "Break" : "Focus"} Timer
-        </h2>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowSettings(!showSettings)}
-          className={`p-1.5 rounded-lg ${isLightTheme ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
-        >
-          <SettingsIcon className="h-4 w-4" />
-        </motion.button>
-      </div>
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className={`mb-3 p-3 rounded-lg ${isLightTheme ? 'bg-gray-100 border border-gray-200' : 'bg-gray-800/50 border border-gray-700/30'}`}
-        >
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={`block text-xs font-medium mb-1 ${isLightTheme ? 'text-gray-700' : 'text-gray-300'}`}>
-                Work (min)
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={workTime}
-                onChange={handleWorkTimeChange}
-                className={`w-full p-1.5 text-sm rounded-lg ${isLightTheme ? 'bg-white border border-gray-300' : 'bg-gray-900 border border-gray-700'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
-            </div>
-            <div>
-              <label className={`block text-xs font-medium mb-1 ${isLightTheme ? 'text-gray-700' : 'text-gray-300'}`}>
-                Break (min)
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={breakTime}
-                onChange={handleBreakTimeChange}
-                className={`w-full p-1.5 text-sm rounded-lg ${isLightTheme ? 'bg-white border border-gray-300' : 'bg-gray-900 border border-gray-700'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Timer Display */}
-      <div className="flex flex-col items-center">
-        <div className="relative mb-3">
-          {/* Circular progress indicator */}
-          <svg className={`${compact ? 'w-28 h-28' : 'w-36 h-36'}`} viewBox="0 0 100 100">
-            {/* Background circle */}
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke={isLightTheme ? "#e5e7eb" : "#1f2937"}
-              strokeWidth="8"
-            />
-            {/* Progress circle */}
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke={isBreak ? "#10b981" : "#8b5cf6"}
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray="283"
-              strokeDashoffset={283 - (283 * calculateProgress()) / 100}
-              transform="rotate(-90 50 50)"
-            />
-          </svg>
-          {/* Time display */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`${compact ? 'text-2xl' : 'text-3xl'} font-mono font-bold ${isLightTheme ? 'text-gray-800' : 'text-white'}`}>
-              {formatTimeLeft()}
-            </span>
-            <span className={`text-xs ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`}>
-              {isBreak ? "Break" : "Focus"}
-            </span>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center space-x-3">
+    <div className={`${compact ? 'p-3' : 'p-6'} rounded-xl ${isLightTheme ? 'bg-white shadow-md border border-gray-200' : 'bg-gray-900/90 border border-gray-800/50'} transition-colors h-full`}>
+      <div className="flex flex-col h-full">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className={`${compact ? 'text-sm' : 'text-xl'} font-bold ${isLightTheme ? 'text-gray-800' : 'text-white'}`}>
+            {isBreak ? "Break" : "Focus"}
+          </h2>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={toggleTimer}
-            className={`${compact ? 'p-2' : 'p-3'} rounded-full ${
-              isActive
-                ? isBreak
-                  ? isLightTheme ? "bg-green-100 text-green-700" : "bg-green-900/30 text-green-400"
-                  : isLightTheme ? "bg-purple-100 text-purple-700" : "bg-purple-900/30 text-purple-400"
-                : isLightTheme ? "bg-gray-200 text-gray-700" : "bg-gray-800 text-gray-300"
-            }`}
+            onClick={() => setShowSettings(!showSettings)}
+            className={`p-1 rounded-lg ${isLightTheme ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
           >
-            {isActive ? <Pause className={`${compact ? 'h-4 w-4' : 'h-5 w-5'}`} /> : <Play className={`${compact ? 'h-4 w-4' : 'h-5 w-5'}`} />}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={resetTimer}
-            className={`${compact ? 'p-2' : 'p-3'} rounded-full ${isLightTheme ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
-          >
-            <RotateCcw className={`${compact ? 'h-4 w-4' : 'h-5 w-5'}`} />
+            <SettingsIcon className="h-3 w-3" />
           </motion.button>
         </div>
 
-        {/* Session counter */}
-        <div className={`mt-2 text-center ${isLightTheme ? 'text-gray-700' : 'text-gray-300'}`}>
-          <p className="text-xs">Sessions: {completedSessions}</p>
+        {/* Timer Display */}
+        <div className="flex flex-col items-center justify-center flex-grow">
+          <div className="relative">
+            {/* Circular progress indicator */}
+            <svg className="w-20 h-20" viewBox="0 0 100 100">
+              {/* Background circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke={isLightTheme ? "#e5e7eb" : "#1f2937"}
+                strokeWidth="8"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke={isBreak ? "#10b981" : "#8b5cf6"}
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray="283"
+                strokeDashoffset={283 - (283 * calculateProgress()) / 100}
+                transform="rotate(-90 50 50)"
+              />
+            </svg>
+            {/* Time display */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-lg font-mono font-bold ${isLightTheme ? 'text-gray-800' : 'text-white'}">
+                {formatTimeLeft()}
+              </span>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center space-x-2 mt-2">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleTimer}
+              className={`p-2 rounded-full ${
+                isActive
+                  ? isBreak
+                    ? isLightTheme ? "bg-green-100 text-green-700" : "bg-green-900/30 text-green-400"
+                    : isLightTheme ? "bg-purple-100 text-purple-700" : "bg-purple-900/30 text-purple-400"
+                  : isLightTheme ? "bg-gray-200 text-gray-700" : "bg-gray-800 text-gray-300"
+              }`}
+            >
+              {isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={resetTimer}
+              className={`p-2 rounded-full ${isLightTheme ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+            >
+              <RotateCcw className="h-4 w-4" />
+            </motion.button>
+          </div>
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ import {
   MessageSquare,
   User,
   Settings,
+  Music,
 } from "lucide-react";
 
 const Sidebar = () => {

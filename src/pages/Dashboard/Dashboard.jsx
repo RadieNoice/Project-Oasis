@@ -7,6 +7,7 @@ import CurrentStreak from "./CurrentStreak.jsx";
 import { toast } from "react-hot-toast";
 import TaskManager from "./TaskManager.jsx";
 import PomodoroBox from "../../components/PomodoroBox.jsx";
+import MusicBox from "./MusicBox.jsx";
 
 const Dashboard = () => {
   // Load saved data from localStorage
@@ -183,36 +184,46 @@ const Dashboard = () => {
   const getProgress = (sessions) => (sessions / 4) * 100;
 
   return (
-    <div className="min-h-screen p-8 space-y-8 relative overflow-hidden">
+    <div className="h-screen p-4 space-y-2 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.1)_0%,_transparent_70%)] pointer-events-none" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+      {/* First row: Stats and Focus Timer */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 relative h-[15vh]">
         <StudyTimeToday todos={todos} workTime={workTime} totalStudyTime={totalStudyTime} />
         <TasksCompleted todos={todos} />
         <CurrentStreak />
         <PomodoroBox compact={true} />
       </div>
 
-      {/* Task Manager is now a separate component */}
-      <TaskManager 
-        todos={todos}
-        setTodos={setTodos}
-        taskTimers={taskTimers}
-        activeTimers={activeTimers}
-        isBreakTimers={isBreakTimers}
-        workTime={workTime}
-        newTodo={newTodo}
-        setNewTodo={setNewTodo}
-        priority={priority}
-        setPriority={setPriority}
-        dueDate={dueDate}
-        setDueDate={setDueDate}
-        addTodo={addTodo}
-        toggleTimer={toggleTimer}
-        resetTimer={resetTimer}
-        formatTimeLeft={formatTimeLeft}
-        getProgress={getProgress}
-      />
+      {/* Second row: Music Box */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 relative h-[28vh]">
+        <div className="lg:col-span-1">
+          <MusicBox />
+        </div>
+      </div>
+
+      {/* Task Manager */}
+      <div className="h-[52vh]">
+        <TaskManager 
+          todos={todos}
+          setTodos={setTodos}
+          taskTimers={taskTimers}
+          activeTimers={activeTimers}
+          isBreakTimers={isBreakTimers}
+          workTime={workTime}
+          newTodo={newTodo}
+          setNewTodo={setNewTodo}
+          priority={priority}
+          setPriority={setPriority}
+          dueDate={dueDate}
+          setDueDate={setDueDate}
+          addTodo={addTodo}
+          toggleTimer={toggleTimer}
+          resetTimer={resetTimer}
+          formatTimeLeft={formatTimeLeft}
+          getProgress={getProgress}
+        />
+      </div>
     </div>
   );
 };
