@@ -6,7 +6,7 @@ import TasksCompleted from "./TasksCompleted.jsx";
 import CurrentStreak from "./CurrentStreak.jsx";
 import { toast } from "react-hot-toast";
 import TaskManager from "./TaskManager.jsx";
-import PomodoroBox from "../../components/PomodoroBox.jsx";
+import PomodoroBox from "./PomodoroBox.jsx";
 import MusicBox from "./MusicBox.jsx";
 
 const Dashboard = () => {
