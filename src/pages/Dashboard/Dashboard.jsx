@@ -11,21 +11,21 @@ import MusicBox from "./MusicBox.jsx";
 
 const Dashboard = () => {
   // Load saved data from localStorage
-  const [workTime, setWorkTime] = useState(() => {
-    return parseInt(localStorage.getItem("workTime")) || 25;
-  });
-  const [breakTime, setBreakTime] = useState(() => {
-    return parseInt(localStorage.getItem("breakTime")) || 5;
-  });
-  
+  const [workTime, setWorkTime] = useState(
+    () => parseInt(localStorage.getItem("workTime")) || 25
+  );
+  const [breakTime, setBreakTime] = useState(
+    () => parseInt(localStorage.getItem("breakTime")) || 5
+  );
+
   // Replace single timer with task-specific timers
   const [taskTimers, setTaskTimers] = useState({});
   const [activeTimers, setActiveTimers] = useState({});
   const [isBreakTimers, setIsBreakTimers] = useState({});
-  
-  const [totalStudyTime, setTotalStudyTime] = useState(() => {
-    return parseInt(localStorage.getItem("totalStudyTime")) || 0;
-  });
+
+  const [totalStudyTime, setTotalStudyTime] = useState(
+    () => parseInt(localStorage.getItem("totalStudyTime")) || 0
+  );
 
   const [todos, setTodos] = useState(() => {
     try {
@@ -60,22 +60,22 @@ const Dashboard = () => {
   useEffect(() => {
     const newTaskTimers = { ...taskTimers };
     const newIsBreakTimers = { ...isBreakTimers };
-    
-    todos.forEach(todo => {
+
+    todos.forEach((todo) => {
       if (!(todo.id in taskTimers)) {
         newTaskTimers[todo.id] = workTime * 60;
         newIsBreakTimers[todo.id] = false;
       }
     });
-    
+
     // Remove timers for deleted tasks
-    Object.keys(taskTimers).forEach(id => {
-      if (!todos.find(todo => todo.id === id)) {
+    Object.keys(taskTimers).forEach((id) => {
+      if (!todos.find((todo) => todo.id === id)) {
         delete newTaskTimers[id];
         delete newIsBreakTimers[id];
       }
     });
-    
+
     setTaskTimers(newTaskTimers);
     setIsBreakTimers(newIsBreakTimers);
   }, [todos, workTime]);
@@ -83,39 +83,45 @@ const Dashboard = () => {
   // Timer countdown logic for all active timers
   useEffect(() => {
     let intervals = {};
-    
+
     Object.entries(activeTimers).forEach(([todoId, isActive]) => {
       if (isActive && taskTimers[todoId] > 0) {
         intervals[todoId] = setInterval(() => {
-          setTaskTimers(prev => ({
+          setTaskTimers((prev) => ({
             ...prev,
-            [todoId]: prev[todoId] - 1
+            [todoId]: prev[todoId] - 1,
           }));
-          
+
           // Track study time if not in break mode
           if (!isBreakTimers[todoId]) {
-            setTotalStudyTime(prev => prev + 1/60);
+            setTotalStudyTime((prev) => prev + 1 / 60);
           }
         }, 1000);
       } else if (isActive && taskTimers[todoId] === 0) {
         handleSessionEnd(todoId);
         // Play notification sound and show toast
-        new Audio("/notification.mp3").play().catch(err => console.log("Audio playback prevented:", err));
-        toast.success(`${isBreakTimers[todoId] ? "Break time" : "Work session"} completed for task!`);
+        new Audio("/notification.mp3")
+          .play()
+          .catch((err) => console.log("Audio playback prevented:", err));
+        toast.success(
+          `${
+            isBreakTimers[todoId] ? "Break time" : "Work session"
+          } completed for task!`
+        );
       }
     });
-    
+
     return () => {
-      Object.values(intervals).forEach(interval => clearInterval(interval));
+      Object.values(intervals).forEach((interval) => clearInterval(interval));
     };
   }, [activeTimers, taskTimers, isBreakTimers]);
 
   const handleSessionEnd = (todoId) => {
-    setActiveTimers(prev => ({
+    setActiveTimers((prev) => ({
       ...prev,
-      [todoId]: false
+      [todoId]: false,
     }));
-    
+
     if (!isBreakTimers[todoId]) {
       setTodos(
         todos.map((todo) =>
@@ -125,41 +131,43 @@ const Dashboard = () => {
         )
       );
     }
-    
-    setIsBreakTimers(prev => ({
+
+    setIsBreakTimers((prev) => ({
       ...prev,
-      [todoId]: !prev[todoId]
+      [todoId]: !prev[todoId],
     }));
-    
-    setTaskTimers(prev => ({
+
+    setTaskTimers((prev) => ({
       ...prev,
-      [todoId]: (isBreakTimers[todoId] ? workTime : breakTime) * 60
+      [todoId]: (isBreakTimers[todoId] ? workTime : breakTime) * 60,
     }));
   };
 
   const toggleTimer = (todoId) => {
-    setActiveTimers(prev => ({
+    setActiveTimers((prev) => ({
       ...prev,
-      [todoId]: !prev[todoId]
+      [todoId]: !prev[todoId],
     }));
   };
 
   const resetTimer = (todoId) => {
-    setActiveTimers(prev => ({
+    setActiveTimers((prev) => ({
       ...prev,
-      [todoId]: false
+      [todoId]: false,
     }));
-    
-    setTaskTimers(prev => ({
+
+    setTaskTimers((prev) => ({
       ...prev,
-      [todoId]: (isBreakTimers[todoId] ? breakTime : workTime) * 60
+      [todoId]: (isBreakTimers[todoId] ? breakTime : workTime) * 60,
     }));
   };
 
   const formatTimeLeft = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const addTodo = (e) => {
@@ -184,45 +192,51 @@ const Dashboard = () => {
   const getProgress = (sessions) => (sessions / 4) * 100;
 
   return (
-    <div className="h-screen p-4 space-y-2 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col p-4 space-y-6 relative overflow-auto">
+      {/* Background gradient overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.1)_0%,_transparent_70%)] pointer-events-none" />
 
-      {/* First row: Stats and Focus Timer */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 relative h-[15vh]">
-        <StudyTimeToday todos={todos} workTime={workTime} totalStudyTime={totalStudyTime} />
+      {/* Top row: Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StudyTimeToday
+          todos={todos}
+          workTime={workTime}
+          totalStudyTime={totalStudyTime}
+        />
         <TasksCompleted todos={todos} />
         <CurrentStreak />
-        <PomodoroBox compact={true} />
       </div>
 
-      {/* Second row: Music Box */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 relative h-[28vh]">
-        <div className="lg:col-span-1">
-          <MusicBox />
+      {/* Separate box for PomodoroBox (swapped above main content) */}
+        <PomodoroBox/>
+
+
+      {/* Main Content: TaskManager and MusicBox */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="md:basis-3/5 w-full">
+          <TaskManager
+            todos={todos}
+            setTodos={setTodos}
+            taskTimers={taskTimers}
+            activeTimers={activeTimers}
+            isBreakTimers={isBreakTimers}
+            workTime={workTime}
+            newTodo={newTodo}
+            setNewTodo={setNewTodo}
+            priority={priority}
+            setPriority={setPriority}
+            dueDate={dueDate}
+            setDueDate={setDueDate}
+            addTodo={addTodo}
+            toggleTimer={toggleTimer}
+            resetTimer={resetTimer}
+            formatTimeLeft={formatTimeLeft}
+            getProgress={getProgress}
+          />
         </div>
-      </div>
-
-      {/* Task Manager */}
-      <div className="h-[52vh]">
-        <TaskManager 
-          todos={todos}
-          setTodos={setTodos}
-          taskTimers={taskTimers}
-          activeTimers={activeTimers}
-          isBreakTimers={isBreakTimers}
-          workTime={workTime}
-          newTodo={newTodo}
-          setNewTodo={setNewTodo}
-          priority={priority}
-          setPriority={setPriority}
-          dueDate={dueDate}
-          setDueDate={setDueDate}
-          addTodo={addTodo}
-          toggleTimer={toggleTimer}
-          resetTimer={resetTimer}
-          formatTimeLeft={formatTimeLeft}
-          getProgress={getProgress}
-        />
+        <div className="md:basis-2/5 w-full">
+          <MusicBox className="w-full h-full" />
+        </div>
       </div>
     </div>
   );
