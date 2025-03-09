@@ -22,12 +22,24 @@ import {
   Briefcase,
   Save,
   Settings,
+  Smartphone,
+  Trash2,
+  Database,
+  RefreshCw,
+  Settings2,
+  SendHorizontal,
+  MessageCircle,
+  Users,
+  Lightbulb,
+  Star,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import SpotlightCard from "../components/reactbits/SpotlightCard";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Setting = () => {
   const user = useAuthStore((state) => state.user);
+  const { isLightTheme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("account");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState({
@@ -37,7 +49,7 @@ const Setting = () => {
   });
 
   // Theme settings
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState(isLightTheme ? "light" : "dark");
   const [accentColor, setAccentColor] = useState("blue");
 
   // Notification settings
@@ -56,6 +68,7 @@ const Setting = () => {
     showActivity: true,
     shareStats: false,
     allowDataCollection: true,
+    twoFactorEnabled: false,
   });
 
   // Account settings
@@ -183,6 +196,22 @@ const Setting = () => {
       </motion.div>
     );
   };
+
+  // Handle theme change
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    if (newTheme === "light" && !isLightTheme) {
+      toggleTheme();
+    } else if (newTheme === "dark" && isLightTheme) {
+      toggleTheme();
+    }
+    // System theme handling can be added here if needed
+  };
+
+  // Update theme when isLightTheme changes from navigation
+  useEffect(() => {
+    setTheme(isLightTheme ? "light" : "dark");
+  }, [isLightTheme]);
 
   return (
     <motion.div
@@ -716,7 +745,7 @@ const Setting = () => {
                               ? "border-blue-500"
                               : "border-gray-700/50"
                           } rounded-lg overflow-hidden`}
-                          onClick={() => setTheme("dark")}
+                          onClick={() => handleThemeChange("dark")}
                         >
                           <div className="h-24 bg-gray-900 relative">
                             <div className="absolute top-3 left-3 right-3 h-3 bg-gray-800 rounded"></div>
@@ -739,7 +768,7 @@ const Setting = () => {
                               ? "border-blue-500"
                               : "border-gray-700/50"
                           } rounded-lg overflow-hidden`}
-                          onClick={() => setTheme("light")}
+                          onClick={() => handleThemeChange("light")}
                         >
                           <div className="h-24 bg-gray-200 relative">
                             <div className="absolute top-3 left-3 right-3 h-3 bg-white rounded"></div>
@@ -762,7 +791,7 @@ const Setting = () => {
                               ? "border-blue-500"
                               : "border-gray-700/50"
                           } rounded-lg overflow-hidden`}
-                          onClick={() => setTheme("system")}
+                          onClick={() => handleThemeChange("system")}
                         >
                           <div className="h-24 bg-gradient-to-br from-gray-900 to-gray-200 relative">
                             <div className="absolute top-3 left-3 right-3 h-3 bg-gray-700/50 rounded"></div>
@@ -776,6 +805,451 @@ const Setting = () => {
                           </div>
                           <div className="p-3 text-center text-sm text-gray-400">
                             System
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </motion.div>
+            )}
+
+            {/* Privacy Settings */}
+            {activeTab === "privacy" && (
+              <motion.div
+                key="privacy"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <SpotlightCard
+                  className="bg-gradient-to-br from-gray-900/70 to-gray-800/40 rounded-2xl border border-gray-800/30 backdrop-blur-lg p-6"
+                  spotlightColor="rgba(255, 255, 255, 0.07)"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-200">
+                      Privacy & Security
+                    </h2>
+                    <Lock size={20} className="text-gray-500" />
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Two-Factor Authentication */}
+                    <div>
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Two-Factor Authentication (2FA)
+                      </h3>
+                      <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <div className="text-gray-300 font-medium">Enable 2FA</div>
+                            <div className="text-sm text-gray-500">Add an extra layer of security to your account</div>
+                          </div>
+                          <ToggleSwitch
+                            isOn={privacySettings.twoFactorEnabled}
+                            onToggle={() => handleToggle("privacy", "twoFactorEnabled")}
+                          />
+                        </div>
+                        <button className="mt-2 text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                          Configure 2FA settings
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Active Sessions */}
+                    <div className="pt-4 border-t border-gray-800/40">
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Active Sessions
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                <Monitor className="h-4 w-4 text-blue-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Current Device</div>
+                                <div className="text-sm text-gray-500">Windows • Chrome • Active now</div>
+                              </div>
+                            </div>
+                            <div className="text-sm text-green-400">Current</div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <Smartphone className="h-4 w-4 text-purple-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Mobile App</div>
+                                <div className="text-sm text-gray-500">iPhone 13 • Last active 2h ago</div>
+                              </div>
+                            </div>
+                            <button className="text-sm text-red-400 hover:text-red-300 transition-colors">
+                              Revoke
+                            </button>
+                          </div>
+                        </div>
+
+                        <button className="w-full mt-2 text-sm text-blue-400 hover:text-blue-300 transition-colors text-center">
+                          View all active sessions
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Account Deletion */}
+                    <div className="pt-4 border-t border-gray-800/40">
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Delete Account
+                      </h3>
+                      <div className="bg-red-900/20 p-4 rounded-lg border border-red-900/30">
+                        <div className="flex items-center gap-3 mb-3">
+                          <AlertCircle className="h-5 w-5 text-red-400" />
+                          <div className="text-gray-300">Permanently Delete Your Account</div>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-4">
+                          This action cannot be undone. All your data, including tasks, settings, and progress will be permanently removed.
+                        </p>
+                        <button className="w-full py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg flex items-center justify-center gap-2 transition-all border border-red-500/30">
+                          Delete Account
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </motion.div>
+            )}
+
+            {/* Data & Backups Settings */}
+            {activeTab === "backups" && (
+              <motion.div
+                key="backups"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <SpotlightCard
+                  className="bg-gradient-to-br from-gray-900/70 to-gray-800/40 rounded-2xl border border-gray-800/30 backdrop-blur-lg p-6"
+                  spotlightColor="rgba(255, 255, 255, 0.07)"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-200">
+                      Data & Backups
+                    </h2>
+                    <Download size={20} className="text-gray-500" />
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Sync & Auto-Save */}
+                    <div>
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Sync & Auto-Save
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                <Save className="h-4 w-4 text-blue-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Auto-Save Preferences</div>
+                                <div className="text-sm text-gray-500">Automatically save your settings and customizations</div>
+                              </div>
+                            </div>
+                            <ToggleSwitch
+                              isOn={true}
+                              onToggle={() => handleToggle("backup", "autoSave")}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <Clock className="h-4 w-4 text-purple-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Restore Last Session</div>
+                                <div className="text-sm text-gray-500">Recover previous tabs, tasks, or notes</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 transition-colors">
+                              Restore
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Clear & Manage Data */}
+                    <div className="pt-4 border-t border-gray-800/40">
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Clear & Manage Data
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-amber-500/20 rounded-full flex items-center justify-center">
+                                <Trash2 className="h-4 w-4 text-amber-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Clear Cache & Temporary Files</div>
+                                <div className="text-sm text-gray-500">Free up space and improve performance</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-amber-500/20 text-amber-400 rounded-lg text-sm hover:bg-amber-500/30 transition-colors">
+                              Clear Cache
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                                <Database className="h-4 w-4 text-green-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Manage Stored Data</div>
+                                <div className="text-sm text-gray-500">View and delete saved study sessions and notes</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30 transition-colors">
+                              View Data
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-red-900/20 p-4 rounded-lg border border-red-900/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                                <AlertCircle className="h-4 w-4 text-red-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Reset to Default</div>
+                                <div className="text-sm text-gray-500">Reset all settings and preferences</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-colors border border-red-500/30">
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </motion.div>
+            )}
+
+            {/* Help & Support Settings */}
+            {activeTab === "help" && (
+              <motion.div
+                key="help"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <SpotlightCard
+                  className="bg-gradient-to-br from-gray-900/70 to-gray-800/40 rounded-2xl border border-gray-800/30 backdrop-blur-lg p-6"
+                  spotlightColor="rgba(255, 255, 255, 0.07)"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-200">
+                      Help & Support
+                    </h2>
+                    <HelpCircle size={20} className="text-gray-500" />
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* FAQs */}
+                    <div>
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Frequently Asked Questions (FAQs)
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="h-8 w-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                              <Settings className="h-4 w-4 text-blue-400" />
+                            </div>
+                            <div>
+                              <div className="text-gray-300">Getting Started</div>
+                              <div className="text-sm text-gray-500">How to set up your account and customize settings</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="h-8 w-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                              <Zap className="h-4 w-4 text-purple-400" />
+                            </div>
+                            <div>
+                              <div className="text-gray-300">Using Features</div>
+                              <div className="text-sm text-gray-500">How to enable focus mode, integrate apps, and use the study timer</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                              <Lock className="h-4 w-4 text-green-400" />
+                            </div>
+                            <div>
+                              <div className="text-gray-300">Account & Security</div>
+                              <div className="text-sm text-gray-500">How to reset your password and manage linked accounts</div>
+                            </div>
+                          </div>
+                        </div>
+                        <button className="w-full py-2 bg-gray-800/40 hover:bg-gray-700/50 text-blue-400 rounded-lg text-sm transition-colors border border-gray-700/30">
+                          View All FAQs
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Troubleshooting & Self-Help */}
+                    <div className="pt-4 border-t border-gray-800/40">
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Troubleshooting & Self-Help
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                <RefreshCw className="h-4 w-4 text-blue-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Refresh Session</div>
+                                <div className="text-sm text-gray-500">Fix minor bugs by restarting the browser session</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors">
+                              Refresh
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <Settings2 className="h-4 w-4 text-purple-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Run Diagnostics</div>
+                                <div className="text-sm text-gray-500">Check for common issues and suggest fixes</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 transition-colors">
+                              Run Check
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-amber-500/20 rounded-full flex items-center justify-center">
+                                <Settings className="h-4 w-4 text-amber-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Reset Settings</div>
+                                <div className="text-sm text-gray-500">Restore default settings if something isn't working</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-amber-500/20 text-amber-400 rounded-lg text-sm hover:bg-amber-500/30 transition-colors">
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact Support */}
+                    <div className="pt-4 border-t border-gray-800/40">
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Contact Support
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30 flex flex-col items-center text-center">
+                          <div className="h-10 w-10 bg-blue-500/20 rounded-full flex items-center justify-center mb-3">
+                            <SendHorizontal className="h-5 w-5 text-blue-400" />
+                          </div>
+                          <div className="text-gray-300 font-medium mb-1">Email Support</div>
+                          <div className="text-sm text-gray-500 mb-3">Reach out for help via email</div>
+                          <button className="w-full py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors">
+                            Send Email
+                          </button>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30 flex flex-col items-center text-center">
+                          <div className="h-10 w-10 bg-purple-500/20 rounded-full flex items-center justify-center mb-3">
+                            <MessageCircle className="h-5 w-5 text-purple-400" />
+                          </div>
+                          <div className="text-gray-300 font-medium mb-1">Live Chat</div>
+                          <div className="text-sm text-gray-500 mb-3">Chat with support in real-time</div>
+                          <button className="w-full py-1.5 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 transition-colors">
+                            Start Chat
+                          </button>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30 flex flex-col items-center text-center">
+                          <div className="h-10 w-10 bg-green-500/20 rounded-full flex items-center justify-center mb-3">
+                            <Users className="h-5 w-5 text-green-400" />
+                          </div>
+                          <div className="text-gray-300 font-medium mb-1">Community Forum</div>
+                          <div className="text-sm text-gray-500 mb-3">Ask questions and get help</div>
+                          <button className="w-full py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30 transition-colors">
+                            Join Forum
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Feedback & Feature Requests */}
+                    <div className="pt-4 border-t border-gray-800/40">
+                      <h3 className="text-md font-medium text-gray-300 mb-4">
+                        Feedback & Feature Requests
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                <Lightbulb className="h-4 w-4 text-blue-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Suggest a Feature</div>
+                                <div className="text-sm text-gray-500">Have an idea? Let us know!</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors">
+                              Submit Request
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 bg-amber-500/20 rounded-full flex items-center justify-center">
+                                <Star className="h-4 w-4 text-amber-400" />
+                              </div>
+                              <div>
+                                <div className="text-gray-300">Rate Us</div>
+                                <div className="text-sm text-gray-500">Give feedback on your experience</div>
+                              </div>
+                            </div>
+                            <button className="px-3 py-1.5 bg-amber-500/20 text-amber-400 rounded-lg text-sm hover:bg-amber-500/30 transition-colors">
+                              Rate Now
+                            </button>
                           </div>
                         </div>
                       </div>

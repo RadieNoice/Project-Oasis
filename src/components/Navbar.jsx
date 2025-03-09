@@ -50,6 +50,7 @@ const Navbar = () => {
     "/leaderboard": { label: "Leaderboard", icon: "bar-chart" },
     "/chat": { label: "Chat", icon: "message-circle" },
     "/profile": { label: "Profile", icon: "user" },
+    "/settings": { label: "Settings", icon: "settings" }
   };
 
   // State to track opened "tabs" as objects { path, label, icon }
