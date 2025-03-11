@@ -5,6 +5,7 @@ import Particles from "../../components/reactbits/Particles";
 import CountUp from '../../components/reactbits/Countup';
 import Magnet from '../../components/reactbits/Magnet';
 import ClickSpark from '../../components/reactbits/clickspark';
+
 const Landing = () => {
   // Subtle gradient effect that changes over time
   const [gradientPosition, setGradientPosition] = useState(0);
@@ -71,6 +72,7 @@ const Landing = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
+
 <ClickSpark
   sparkColor='#fff'
   sparkSize={10}
@@ -83,11 +85,11 @@ x
 
       {/* Background Layer */}
       <div className="absolute inset-0 z-0">
-        <Particles
-          particleColors={["#ffffff", "#a5b4fc"]}
-          particleCount={180}
-          particleSpread={15}
-          speed={0.8}
+      <Particles
+          particleColors={["#ffffff", "#ffffff"]}
+          particleCount={1000}
+          particleSpread={10}
+          speed={1}
           particleBaseSize={120}
           moveParticlesOnHover={true}
           alphaParticles={true}
@@ -501,12 +503,12 @@ x
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="p-6 rounded-xl bg-gradient-to-br from-blue-600/10 to-blue-800/10 border border-gray-800 hover:border-gray-700 transition-all">
                 <h4 className="text-xl font-semibold text-white mb-3">Basic Plan</h4>
-                <p className="text-gray-400 mb-4">Ideal for individuals</p>
+                <p className="text-gray-400 mb-4">1 Month</p>
                 <div className="text-4xl font-bold text-white mb-4">₹199</div>
                 <ul className="text-gray-400 mb-6">
-                  <li className="mb-2">Feature 1</li>
-                  <li className="mb-2">Feature 2</li>
-                  <li className="mb-2">Feature 3</li>
+                  <li className="mb-2">Ad Free Experience</li>
+                  <li className="mb-2">5 GB Book Shelf Storage</li>
+                  <li className="mb-2">Deep Seek r1 Integration</li>
                 </ul>
                 <Link to="/loginregister">
                   <motion.button
@@ -527,13 +529,14 @@ x
                   Most Popular
                 </div>
                 <h4 className="text-xl font-semibold text-white mb-3">Standard Plan</h4>
-                <p className="text-gray-400 mb-4">Perfect for small teams</p>
+                <p className="text-gray-400 mb-4">6 Months</p>
                 <div className="text-4xl font-bold text-white mb-4">₹399</div>
                 <ul className="text-gray-400 mb-6">
-                  <li className="mb-2">Feature 1</li>
-                  <li className="mb-2">Feature 2</li>
-                  <li className="mb-2">Feature 3</li>
-                  <li className="mb-2">Feature 4</li>
+                <li className="mb-2">Ad Free Experience</li>
+                <li className="mb-2">10 GB Book Shelf Storage</li>
+                <li className="mb-2">ChatGPT-4o Integration</li>
+                <li className="mb-2">DeepSeek r1 Access</li>
+                <li className="mb-2">Claude 3.7 Sonet Access</li>
                 </ul>
                 <Link to="/loginregister">
                   <motion.button
@@ -551,14 +554,13 @@ x
 
               <div className="p-6 rounded-xl bg-gradient-to-br from-purple-600/10 to-purple-800/10 border border-gray-800 hover:border-gray-700 transition-all">
                 <h4 className="text-xl font-semibold text-white mb-3">Premium Plan</h4>
-                <p className="text-gray-400 mb-4">Best for large organizations</p>
+                <p className="text-gray-400 mb-4">12 Months</p>
                 <div className="text-4xl font-bold text-white mb-4">₹599</div>
                 <ul className="text-gray-400 mb-6">
-                  <li className="mb-2">Feature 1</li>
-                  <li className="mb-2">Feature 2</li>
-                  <li className="mb-2">Feature 3</li>
-                  <li className="mb-2">Feature 4</li>
-                  <li className="mb-2">Feature 5</li>
+                <li className="mb-2">Ad Free Experience</li>
+                <li className="mb-2">20 GB Book Shelf Storage</li>
+                <li className="mb-2">AI Pro - Access to all AI features</li>
+                <li className="mb-2">Personal Weekly Meet with the Devs</li>
                 </ul>
                 <Link to="/loginregister">
                   <motion.button

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Particles from "../../components/reactbits/Particles";
+import Balatro from '../../components/reactbits/Balatro';
 
 const LoginRegister = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -73,16 +73,11 @@ const LoginRegister = () => {
       
       {/* Background Layer */}
       <div className="absolute inset-0 z-0">
-        <Particles
-          particleColors={["#ffffff", "#94a3b8"]}
-          particleCount={180}
-          particleSpread={15}
-          speed={0.8}
-          particleBaseSize={120}
-          moveParticlesOnHover={true}
-          alphaParticles={true}
-          disableRotation={true}
-        />
+      <Balatro
+  isRotate={false}
+  mouseInteraction={false}
+  pixelFilter={700}
+/>
         {/* Enhanced background effects */}
         <div style={gradientStyle} />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-black/40 pointer-events-none" />
