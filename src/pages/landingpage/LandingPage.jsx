@@ -5,6 +5,7 @@ import Particles from "../../components/reactbits/Particles";
 import CountUp from '../../components/reactbits/Countup';
 import Magnet from '../../components/reactbits/Magnet';
 import ClickSpark from '../../components/reactbits/clickspark';
+import RotatingText from '../../components/reactbits/Rotating';
 
 const Landing = () => {
   // Subtle gradient effect that changes over time
@@ -179,10 +180,20 @@ x
                 transition={{ duration: 0.7, delay: 0.2 }}
               >
                 Your Personal <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400">
-                  Productivity Oasis
-                </span>
-              </motion.h2>
+                <RotatingText
+  texts={['Project',  'Oasis']}
+  mainClassName="w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80 px-1 sm:px-1.5 md:px-2 bg-cyan-300 text-black overflow-hidden py-0.25 sm:py-0.5 md:py-1 justify-center rounded-md"
+  staggerFrom={"last"}
+  initial={{ y: "100%" }}
+  animate={{ y: 0 }}
+  exit={{ y: "-120%" }}
+  staggerDuration={0.025}
+  splitLevelClassName="overflow-hidden pb-0.25 sm:pb-0.5 md:pb-0.5"
+  transition={{ type: "spring", damping: 30, stiffness: 400 }}
+  rotationInterval={2000}
+/>
+                  
+                </motion.h2>
 
               <motion.p
                 className="text-lg text-gray-300 mb-8 max-w-lg"
