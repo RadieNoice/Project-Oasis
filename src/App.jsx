@@ -28,7 +28,6 @@ const Landing = React.lazy(() => import("./pages/landingpage/LandingPage.jsx"));
 const LoginRegister = React.lazy(() =>
   import("./pages/Login/LoginRegister.jsx")
 );
-const Music = React.lazy(() => import("./pages/Music.jsx"));
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
