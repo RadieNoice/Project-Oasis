@@ -24,7 +24,7 @@ const Leaderboard = React.lazy(() => import("./pages/Leaderboard.jsx"));
 const Chat = React.lazy(() => import("./pages/Chat.jsx"));
 const Profile = React.lazy(() => import("./pages/Profile.jsx"));
 const Setting = React.lazy(() => import("./pages/Settings.jsx"));
-const Landing = React.lazy(() => import("./pages/LandingPage.jsx"));
+const Landing = React.lazy(() => import("./pages/landingpage/LandingPage.jsx"));
 const LoginRegister = React.lazy(() =>
   import("./pages/Login/LoginRegister.jsx")
 );

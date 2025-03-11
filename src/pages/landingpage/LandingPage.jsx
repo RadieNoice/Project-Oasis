@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import Particles from "../components/reactbits/Particles";
-
+import Particles from "../../components/reactbits/Particles";
+import CountUp from '../../components/reactbits/Countup';
+import Magnet from '../../components/reactbits/Magnet';
+import ClickSpark from '../../components/reactbits/clickspark';
 const Landing = () => {
   // Subtle gradient effect that changes over time
   const [gradientPosition, setGradientPosition] = useState(0);
@@ -37,10 +39,48 @@ const Landing = () => {
       icon: "🤖",
       color: "from-indigo-600 to-indigo-800",
     },
+    {
+      title: "Calender",
+      description:
+        "Plan your schedule and keep track of tasks and events effectively",
+      icon: "🗓️",
+      color: "from-indigo-600 to-indigo-800",
+    },
+    {
+      title: "Book Shelf",
+      description:
+        "Your all-in-one place to store all the important notes you need to access in an instant.",
+      icon: "📚",
+      color: "from-indigo-600 to-indigo-800",
+    },
+    {
+      title: "Achievements",
+      description:
+        "Game-ify your tasks through achievements to motivate you to complete them.",
+      icon: "🏅",
+      color: "from-indigo-600 to-indigo-800",
+    },
+    {
+      title: "Leaderboard",
+      description:
+        "Indulge in friendly competition with your friends and classmates and try and get to the top",
+      icon: "🌠",
+      color: "from-indigo-600 to-indigo-800",
+    },
   ];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
+<ClickSpark
+  sparkColor='#fff'
+  sparkSize={10}
+  sparkRadius={15}
+  sparkCount={8}
+  duration={400}
+>
+  {/* Your content here */}
+x
+
       {/* Background Layer */}
       <div className="absolute inset-0 z-0">
         <Particles
@@ -84,24 +124,15 @@ const Landing = () => {
           </Link>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/features"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
+            <a href="#features" className="text-gray-300 hover:text-white transition-colors">
               Features
-            </Link>
-            <Link
-              to="/pricing"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
+            </a>
+            <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
               Pricing
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
+            </a>
+            <a href="#about" className="text-gray-300 hover:text-white transition-colors">
               About
-            </Link>
+            </a>
           </div>
 
           <div className="flex items-center space-x-3">
@@ -220,7 +251,15 @@ const Landing = () => {
                 </div>
                 <div>
                   <div className="text-sm text-gray-400">Trusted by</div>
-                  <div className="text-white font-medium">10,000+ users</div>
+
+                  <div className="text-white font-medium">                  <CountUp
+  from={0}
+  to={10000}
+  separator=","
+  direction="up"
+  duration={0.5}
+  className="count-up-text"
+/>+ users</div>
                 </div>
               </motion.div>
             </motion.div>
@@ -231,14 +270,16 @@ const Landing = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
+               
               <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/30 to-purple-600/30 rounded-2xl blur-lg opacity-70"></div>
               <div className="w-full max-w-lg mx-auto aspect-[4/3] rounded-2xl p-1 relative overflow-hidden backdrop-blur-sm border border-gray-800/80 bg-gray-900/40">
                 <div className="relative h-full rounded-xl bg-gray-900/80 p-6 flex flex-col overflow-hidden">
                   {/* Dashboard Mockup Header */}
+                  <Magnet padding={50} disabled={false} magnetStrength={100}>
                   <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <div className="text-lg font-medium text-white">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <div className="text-lg font-medium text-white">
                         Dashboard
                       </div>
                     </div>
@@ -261,8 +302,10 @@ const Landing = () => {
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600"></div>
                     </div>
                   </div>
+                  </Magnet>
 
                   {/* Dashboard Content */}
+                  <Magnet padding={50} disabled={false} magnetStrength={50}>
                   <div className="space-y-5">
                     <div className="flex gap-3">
                       <div className="w-1/2">
@@ -314,6 +357,8 @@ const Landing = () => {
                       </div>
                     </div>
                   </div>
+                  </Magnet>
+
 
                   {/* Animated status indicators */}
                   <motion.div
@@ -328,6 +373,7 @@ const Landing = () => {
                   />
                 </div>
               </div>
+              
 
               {/* Floating elements */}
               <motion.div
@@ -362,12 +408,14 @@ const Landing = () => {
                 <div className="w-6 h-6 rounded-full bg-purple-600/30 mb-2 mx-auto border border-purple-500/40"></div>
                 <div className="h-2 w-10 bg-purple-700/40 rounded mb-1.5"></div>
                 <div className="h-2 w-8 bg-purple-700/40 rounded"></div>
+                
               </motion.div>
             </motion.div>
           </div>
-
+          
           {/* Features Section */}
           <motion.div
+            id="features"
             className="py-16"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -402,7 +450,7 @@ const Landing = () => {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.1, delay: index * 0.1 }}
                   whileHover={{
                     y: -5,
                     boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
@@ -420,6 +468,143 @@ const Landing = () => {
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+
+          {/* Pricing Section */}
+          <motion.div
+            id="pricing"
+            className="py-16"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-800/30 text-blue-400 text-sm inline-block mb-4">
+                  Affordable Pricing
+                </span>
+                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  Choose the plan that fits your needs
+                </h3>
+                <p className="text-gray-400 max-w-xl mx-auto">
+                  We offer flexible pricing plans to suit your requirements and budget.
+                </p>
+              </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-6 rounded-xl bg-gradient-to-br from-blue-600/10 to-blue-800/10 border border-gray-800 hover:border-gray-700 transition-all">
+                <h4 className="text-xl font-semibold text-white mb-3">Basic Plan</h4>
+                <p className="text-gray-400 mb-4">Ideal for individuals</p>
+                <div className="text-4xl font-bold text-white mb-4">₹199</div>
+                <ul className="text-gray-400 mb-6">
+                  <li className="mb-2">Feature 1</li>
+                  <li className="mb-2">Feature 2</li>
+                  <li className="mb-2">Feature 3</li>
+                </ul>
+                <Link to="/loginregister">
+                  <motion.button
+                    className="px-5 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(147, 51, 234, 0.5)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Get Started
+                  </motion.button>
+                </Link>
+              </div>
+
+              <div className="relative p-6 rounded-xl bg-gradient-to-br from-indigo-600/10 to-indigo-800/10 border border-gray-800 hover:border-gray-700 transition-all shadow-lg shadow-indigo-900/30">
+                <div className="absolute top-0 right-0 px-3 py-1.5 rounded-bl-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-semibold">
+                  Most Popular
+                </div>
+                <h4 className="text-xl font-semibold text-white mb-3">Standard Plan</h4>
+                <p className="text-gray-400 mb-4">Perfect for small teams</p>
+                <div className="text-4xl font-bold text-white mb-4">₹399</div>
+                <ul className="text-gray-400 mb-6">
+                  <li className="mb-2">Feature 1</li>
+                  <li className="mb-2">Feature 2</li>
+                  <li className="mb-2">Feature 3</li>
+                  <li className="mb-2">Feature 4</li>
+                </ul>
+                <Link to="/loginregister">
+                  <motion.button
+                    className="px-5 py-2 rounded-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 25px rgba(99, 102, 241, 0.6)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Get Started
+                  </motion.button>
+                </Link>
+              </div>
+
+              <div className="p-6 rounded-xl bg-gradient-to-br from-purple-600/10 to-purple-800/10 border border-gray-800 hover:border-gray-700 transition-all">
+                <h4 className="text-xl font-semibold text-white mb-3">Premium Plan</h4>
+                <p className="text-gray-400 mb-4">Best for large organizations</p>
+                <div className="text-4xl font-bold text-white mb-4">₹599</div>
+                <ul className="text-gray-400 mb-6">
+                  <li className="mb-2">Feature 1</li>
+                  <li className="mb-2">Feature 2</li>
+                  <li className="mb-2">Feature 3</li>
+                  <li className="mb-2">Feature 4</li>
+                  <li className="mb-2">Feature 5</li>
+                </ul>
+                <Link to="/loginregister">
+                  <motion.button
+                    className="px-5 py-2 rounded-lg text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(147, 51, 234, 0.5)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Get Started
+                  </motion.button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* About Section */}
+          <motion.div
+            id="about"
+            className="py-16"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-800/30 text-blue-400 text-sm inline-block mb-4">
+                  About Us
+                </span>
+                <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  Learn more about Project Oasis
+                </h3>
+                <p className="text-gray-400 max-w-xl mx-auto">
+                  Discover our mission, vision, and the team behind Project Oasis.
+                </p>
+              </motion.div>
+            </div>
+
+            {/* About content can be added here */}
           </motion.div>
 
           {/* CTA Section */}
@@ -611,6 +796,7 @@ const Landing = () => {
               © {new Date().getFullYear()} Project Oasis. All rights reserved.
             </div>
             <div className="flex space-x-6">
+              
               {/* Social media icons */}
               <a
                 href="#"
@@ -663,7 +849,9 @@ const Landing = () => {
           </div>
         </footer>
       </div>
+      </ClickSpark>
     </div>
+
   );
 };
 

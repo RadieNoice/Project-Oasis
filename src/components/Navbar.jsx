@@ -43,7 +43,6 @@ const Navbar = () => {
   // Mapping of route paths to display labels and icons
   const pathLabels = {
     "/dashboard": { label: "Dashboard", icon: "grid" },
-    "/pomodoro": { label: "Pomodoro", icon: "clock" },
     "/calendar": { label: "Calendar", icon: "calendar" },
     "/bookshelf": { label: "Book Shelf", icon: "book" },
     "/ai-tools": { label: "AI Assistant", icon: "bot" },
@@ -144,6 +143,7 @@ const Navbar = () => {
   // Plus button toggles the dropdown of available pages
   const handleAddTab = () => {
     setShowPageMenu((prev) => !prev);
+    setShowPageMenu(true);
   };
 
   // Function to close a tab; if the closed tab is active, navigate to a fallback
@@ -226,13 +226,15 @@ const Navbar = () => {
             {/* Tabs Section */}
             <div
               className="relative flex items-center space-x-2"
-              onMouseLeave={() => setShowPageMenu(false)}
             >
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={`p-2 rounded-xl ${isLightTheme ? 'bg-gray-200/50 hover:bg-gray-300 text-gray-700' : 'bg-gray-800/50 hover:bg-gray-800 text-gray-300'} transition-colors`}
-                onClick={handleAddTab}
+                onClick={() => {
+                  handleAddTab();
+                  //setShowPageMenu(false); // Ensures the menu closes right after
+                }}
               >
                 <Plus className="h-5 w-5" />
               </motion.button>

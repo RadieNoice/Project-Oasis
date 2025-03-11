@@ -120,7 +120,7 @@ const AITools = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-gradient-to-b from-black to-gray-900 py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h py-12 px-4 sm:px-6 lg:px-8"
     >
       {/* Tool Viewer Modal */}
       <AnimatePresence>
