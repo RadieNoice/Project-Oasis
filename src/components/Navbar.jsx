@@ -19,6 +19,7 @@ import {
 import { useAuthStore } from "../store/useAuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
+import { useSettings } from "../contexts/SettingsContext";
 
 const Navbar = () => {
   const user = useAuthStore((state) => state.user);
@@ -26,6 +27,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLightTheme, toggleTheme } = useTheme();
+  const { setActiveTab } = useSettings();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,7 +180,7 @@ const Navbar = () => {
   // Handle logout
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/loginregister");
   };
 
   // Get unread notification count
@@ -187,6 +189,13 @@ const Navbar = () => {
   // Mark all notifications as read
   const markAllAsRead = () => {
     setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  };
+
+  // Handle navigation to settings with specific tab
+  const handleSettingsNavigation = (tab) => {
+    navigate("/settings");
+    setActiveTab(tab);
+    setShowProfileMenu(false);
   };
 
   return (
@@ -487,10 +496,17 @@ const Navbar = () => {
                       </div>
                       <div
                         className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
-                        onClick={() => navigate("/settings")}
+                        onClick={() => handleSettingsNavigation("account")}
                       >
                         <Settings className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
                         Settings
+                      </div>
+                      <div
+                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
+                        onClick={() => handleSettingsNavigation("privacy")}
+                      >
+                        <Shield className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
+                        Privacy
                       </div>
                       <div
                         className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
@@ -498,13 +514,6 @@ const Navbar = () => {
                       >
                         <BookOpen className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
                         My Resources
-                      </div>
-                      <div
-                        className={`flex items-center gap-3 px-4 py-2 ${isLightTheme ? 'hover:bg-gray-200/70 text-gray-700' : 'hover:bg-gray-800/70 text-gray-300'} cursor-pointer text-sm`}
-                        onClick={() => navigate("/privacy")}
-                      >
-                        <Shield className={`h-4 w-4 ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`} />
-                        Privacy
                       </div>
                     </div>
 
