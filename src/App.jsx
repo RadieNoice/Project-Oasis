@@ -192,21 +192,6 @@ const App = () => {
                 />
 
                 {/* Music with Layout */}
-                <Route
-                  path="/music"
-                  element={
-                    <Layout>
-                      <motion.div
-                        variants={pageVariants}
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                      >
-                        <Music />
-                      </motion.div>
-                    </Layout>
-                  }
-                />
 
                 {/* Profile with Layout */}
                 <Route

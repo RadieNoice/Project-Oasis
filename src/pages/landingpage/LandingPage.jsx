@@ -601,7 +601,7 @@ x
                   Learn more about Project Oasis
                 </h3>
                 <p className="text-gray-400 max-w-xl mx-auto">
-                  Discover our mission, vision, and the team behind Project Oasis.
+                Welcome to Project Oasis, your ultimate companion for efficient studying and task management. Our platform is designed to help students and professionals stay organized with powerful tools like personalized schedules, task trackers, and study aids. Whether you're planning your day, managing deadlines, or breaking down complex subjects, Project Oasis offers a seamless experience to boost your productivity. Stay focused, stay on track, and turn your goals into achievements with Project Oasis — your digital haven for success.
                 </p>
               </motion.div>
             </div>
